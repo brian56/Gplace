@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--Place type-->
+    <string-array name="place_type_code">
+        <item>section_a</item>
+        <item>accounting</item>
+        <item>airport</item>
+        <item>amusement_park</item>
+
+        <item>section_b</item>
+        <item>bakery</item>
+        <item>bank</item>
+
+        <item>section_c</item>
+        <item>cafe</item>
+        <item>campground</item>
+        <item>car_dealer</item>
+        <item>car_rental</item>
+        <item>car_repair</item>
+        <item>car_wash</item>
+        <item>casino</item>
+        <item>cemetery</item>
+        <item>church</item>
+        <item>city_hall</item>
+        <item>clothing_store</item>
+        <item>convenience_store</item>
+        <item>courthouse</item>
+
+        <item>section_d</item>
+        <item>dentist</item>
+        <item>department_store</item>
+        <item>doctor</item>
+
+        <item>section_e</item>
+        <item>electrician</item>
+        <item>electronics_store</item>
+        <item>embassy</item>
+        <item>establishment</item>
+
+
+    </string-array>
+
+    <string-array name="place_type_name">
+        <item>@string/a</item>
+        <item>@string/accounting</item>
+        <item>@string/airport</item>
+        <item>@string/amusement_park</item>
+
+        <item>@string/b</item>
+        <item>@string/bakery</item>
+        <item>@string/bank</item>
+
+        <item>@string/c</item>
+        <item>@string/cafe</item>
+        <item>@string/campground</item>
+        <item>@string/car_dealer</item>
+        <item>@string/car_rental</item>
+        <item>@string/car_repair</item>
+        <item>@string/car_wash</item>
+        <item>@string/casino</item>
+        <item>@string/cemetery</item>
+        <item>@string/church</item>
+        <item>@string/city_hall</item>
+        <item>@string/clothing_store</item>
+        <item>@string/convenience_store</item>
+        <item>@string/courthouse</item>
+
+        <item>@string/d</item>
+        <item>@string/dentist</item>
+        <item>@string/department_store</item>
+        <item>@string/doctor</item>
+
+        <item>@string/e</item>
+        <item>@string/electrician</item>
+        <item>@string/electronics_store</item>
+        <item>@string/embassy</item>
+        <item>@string/establishment</item>
+
+    </string-array>
+
+    <!--Language-->
+    <string-array name="language_code">
+        <item></item>
+    </string-array>
+    <string-array name="language_name">
+        <item></item>
+    </string-array>
+
+    <!--Country-->
+    <string-array name="country_code">
+        <item></item>
+    </string-array>
+    <string-array name="country_name">
+        <item></item>
+    </string-array>
+</resources>

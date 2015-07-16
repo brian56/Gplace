@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <style name="Theme.AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+	    <item name="colorPrimary">@color/colorPrimary</item>
+	    <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+	    <item name="colorAccent">@color/colorAccent</item>	 
+		<item name="colorControlNormal">@color/colorControlNormal</item>  
+	    <item name="colorControlActivated">@color/colorControlActivated</item>
+		<item name="colorSwitchThumbNormal">@color/colorSwitchThumbNormal</item>
+        <item name="drawerType">@integer/DRAWERTYPE_CUSTOM</item>
+        <item name="android:fastScrollOverlayPosition">atThumb</item>
+        <item name="android:fastScrollPreviewBackgroundRight">@drawable/bg_card</item>
+
+        <item name="drawerColor">#ffeeeeee</item>
+        <!--<item name="rippleBackport">false</item>-->
+        <item name="uniqueToolbarColor">false</item>
+        <item name="singleAccount">false</item>
+        <item name="sectionStyle">@style/MaterialSectionTheme.Light</item>
+        <item name="subheaderStyle">@style/MaterialSubheaderTheme.Light</item>
+        <item name="accountStyle">@style/MaterialAccountTheme</item>
+        <item name="multipaneSupport">false</item>
+        <item name="defaultSectionLoaded">0</item>
+        <item name="learningPattern">true</item>
+        <item name="toolbarElevation">false</item>
+	</style>
+
+</resources>

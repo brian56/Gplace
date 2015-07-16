@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Gplace</string>
+    <string name="title_section1">Section 1</string>
+    <string name="title_section2">Section 2</string>
+    <string name="title_section3">Section 3</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_example">Example action</string>
+
+    <!-- menu item -->
+    <string name="menu_my_location">My Location</string>
+    <string name="menu_search">Search For Place</string>
+    <string name="menu_favorite">Favorite</string>
+    <string name="menu_history">History</string>
+    <string name="menu_about">About</string>
+    <string name="menu_option">Option</string>
+
+    <!--Search fragment-->
+    <string name="search">Search</string>
+    <string name="search_around_here">Search around here</string>
+    <string name="place_type">Place type</string>
+    <string name="extra_options">Extra options</string>
+    <string name="radius">Radius</string>
+    <string name="km">km</string>
+    <string name="order_by">Order by</string>
+
+    <string name="rate">Rate</string>
+    <string name="name">Name</string>
+    <string name="distance">Distance</string>
+    
+    
+    <!--Place type-->
+    <string name="a">AAA</string>
+    <string name="accounting">Accounting</string>
+    <string name="airport">Airport</string>
+    <string name="amusement_park">Amusement park</string>
+
+    <string name="b">BBB</string>
+    <string name="bakery">Bakery</string>
+    <string name="bank">Bank</string>
+    
+    <string name="c">CCC</string>
+    <string name="cafe">Cafe</string>
+    <string name="campground">Campground</string>
+    <string name="car_dealer">car_dealer</string>
+    <string name="car_rental">car_rental</string>
+    <string name="car_repair">car_repair</string>
+    <string name="car_wash">car_wash</string>
+    <string name="casino">casino</string>
+    <string name="cemetery">cemetery</string>
+    <string name="church">church</string>
+    <string name="city_hall">city_hall</string>
+    <string name="clothing_store">clothing_store</string>
+    <string name="convenience_store">convenience_store</string>
+    <string name="courthouse">courthouse</string>
+    
+    <string name="d">DDD</string>
+    <string name="dentist">dentist</string>
+    <string name="department_store">department_store</string>
+    <string name="doctor">doctor</string>
+
+    <string name="e">EEE</string>
+    <string name="electrician">electrician</string>
+    <string name="electronics_store">electronics_store</string>
+    <string name="embassy">embassy</string>
+    <string name="establishment">establishment</string>
+</resources>
