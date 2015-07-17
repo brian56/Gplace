@@ -10,6 +10,8 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -30,15 +32,21 @@ import android.widget.Toast;
 
 import com.dqhuynh.gplace.R;
 import com.dqhuynh.gplace.adapter.PlacesAutoCompleteAdapter;
+import com.dqhuynh.gplace.adapter.SearchResultAdapter;
 import com.dqhuynh.gplace.api.GeocodingRequest;
 import com.dqhuynh.gplace.api.PlaceDetailRequest;
+import com.dqhuynh.gplace.api.PlaceNearBySearchRequest;
 import com.dqhuynh.gplace.callback.LocationListenerCallback;
+import com.dqhuynh.gplace.callback.OnLoadMoreListener;
 import com.dqhuynh.gplace.common.CommonData;
 import com.dqhuynh.gplace.model.Place;
 import com.dqhuynh.gplace.model.PlaceType;
-import com.dqhuynh.gplace.ui.MainActivity;
+import com.dqhuynh.gplace.model.SearchOptions;
 import com.dqhuynh.gplace.utils.GPSTracker;
 import com.dqhuynh.gplace.utils.LogUtil;
+import com.dqhuynh.gplace.views.SlidingUpPanel;
+import com.kisstools.KissTools;
+import com.kisstools.utils.DeviceUtil;
 import com.rey.material.app.Dialog;
 import com.rey.material.widget.Button;
 import com.rey.material.widget.ProgressView;
@@ -54,7 +62,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     private GeocodingRequest mGeocodingRequest = new GeocodingRequest();
     private PlaceDetailRequest mPlaceDetailRequest = new PlaceDetailRequest();
-    private PlacesAutoCompleteAdapter mAdapter;
+    private PlacesAutoCompleteAdapter mAutoCompleteAdapter;
     private GetCurrentAddressAsyncTask mGetCurrentAddressTask;
     private AutoCompleteTextView autoCompleteView;
     private Animation mZoomOutAnimation;
@@ -71,12 +79,16 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private Location mSearchLocation;
     private RadioButton radProminence;
     private RadioButton radDistance;
+    private SlidingUpPanel mSlidingUpPanel;
     private GetPlaceLatLngAsyncTask mGetPlaceLatLngTask;
     private Dialog.Builder builder = null;
     public static ArrayList<PlaceType> selectedPlaceTypes;
     private String sortBy = "";
     private int distance = 5;
     private static final int DIALOG_RESULT_CODE = 1;
+    private RecyclerView mRvResults;
+    private ArrayList<Place> listResults = new ArrayList<>();
+    private SearchResultAdapter mAdapter;
     HandlerThread mHandlerThread;
     Handler mThreadHandler;
     GPSTracker gps;
@@ -98,7 +110,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_search, container, false);
-
+        KissTools.setContext(getActivity());
         autoCompleteView = (AutoCompleteTextView) view.findViewById(R.id.autoCompleteTextView);
         mbtnCurrentLocation = (ImageView) view.findViewById(R.id.btnCurrentLocation);
         mPgCurrentLocation = (ProgressView) view.findViewById(R.id.progressCurrentLocation);
@@ -112,18 +124,12 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mSeekBarRadius.setEnabled(!radDistance.isChecked());
         mBtnSearch = (Button) view.findViewById(R.id.btnSearch);
         mBtnSearch.setOnClickListener(this);
-        mClearText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                mPlaceTypeContainer.requestFocus();
-                autoCompleteView.setText("");
-                if(CommonData.currentLocation!=null) {
-                    autoCompleteView.setHint("Search around here");
-                }
-                CommonData.searchLocation = CommonData.currentLocation;
-                CommonData.currentSearchOption.setLocation(CommonData.currentLocation);
-            }
-        });
+        mClearText.setOnClickListener(this);
+        mRvResults = (RecyclerView) view.findViewById(R.id.rvResults);
+        mSlidingUpPanel = (SlidingUpPanel) view.findViewById(R.id.searchPanel);
+        setupPanel();
+        setupResultRecycleView();
+
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -189,6 +195,14 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         return view;
     }
 
+    public void setupPanel() {
+//        mSlidingUpPanel.openPanel();
+        mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48+8));
+    }
+    public void doSearch() {
+        SearchTask task = new SearchTask();
+        task.execute(CommonData.currentSearchOption);
+    }
     /**
      * Load default/saved search options on start/resume
      */
@@ -225,6 +239,14 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mPlaceTypeContainer.requestFocus();
         android.support.v4.app.FragmentManager fm = getActivity().getSupportFragmentManager();
         switch (v.getId()) {
+            case R.id.btnClearText:
+                autoCompleteView.setText("");
+                if (CommonData.currentLocation != null) {
+                    autoCompleteView.setHint("Search around here");
+                }
+                CommonData.searchLocation = CommonData.currentLocation;
+                CommonData.currentSearchOption.setLocation(CommonData.currentLocation);
+                break;
             case R.id.btnAddPlaceType:
                 PlaceTypeDialogFragment p = new PlaceTypeDialogFragment();
                 p.setTargetFragment(this, 1);
@@ -232,11 +254,17 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 break;
             case R.id.btnSearch:
                 if (CommonData.currentSearchOption != null) {
-                    Toast.makeText(getActivity(), CommonData.currentSearchOption.toString(),
-                            Toast.LENGTH_LONG).show();
-                    Fragment mFragment = new SearchResultFragment();
-                    MainActivity main = (MainActivity) getActivity();
-                    main.setFragmentChild(mFragment, "Result");
+//                    Toast.makeText(getActivity(), CommonData.currentSearchOption.toString(),
+//                            Toast.LENGTH_LONG).show();
+//                    Fragment mFragment = new SearchResultFragment();
+//                    MainActivity main = (MainActivity) getActivity();
+//                    main.setFragmentChild(mFragment, "Result");
+                    if(mSlidingUpPanel.isOpen()) {
+                        mSlidingUpPanel.closePanel();
+                    } else {
+                        mSlidingUpPanel.openPanel(false);
+                        doSearch();
+                    }
                 }
                 break;
         }
@@ -370,7 +398,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
      * Setup data for Place auto complete view
      */
     private void setupPlaceAutoCompleteView() {
-        mAdapter = new PlacesAutoCompleteAdapter(getActivity(), R.layout.row_item_autocomplete);
+        mAutoCompleteAdapter = new PlacesAutoCompleteAdapter(getActivity(), R.layout.row_item_autocomplete);
         autoCompleteView.setAdapter(new PlacesAutoCompleteAdapter(getActivity(), R.layout.row_item_autocomplete));
 
         if (mThreadHandler == null) {
@@ -385,12 +413,12 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 @Override
                 public void handleMessage(Message msg) {
                     if (msg.what == 1) {
-                        ArrayList<String> results = mAdapter.resultList;
+                        ArrayList<String> results = mAutoCompleteAdapter.resultList;
 
                         if (results != null && results.size() > 0) {
-                            mAdapter.notifyDataSetChanged();
+                            mAutoCompleteAdapter.notifyDataSetChanged();
                         } else {
-                            mAdapter.notifyDataSetInvalidated();
+                            mAutoCompleteAdapter.notifyDataSetInvalidated();
                         }
                     }
                 }
@@ -430,11 +458,11 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                     public void run() {
                         // Background thread
                         if (!value.equals(""))
-                            mAdapter.resultList = mAdapter.mPlaceAPI.autoComplete(value);
-                        if (mAdapter != null && mAdapter.resultList != null) {
+                            mAutoCompleteAdapter.resultList = mAutoCompleteAdapter.mPlaceAPI.autoComplete(value);
+                        if (mAutoCompleteAdapter != null && mAutoCompleteAdapter.resultList != null) {
                             // Footer
-                            if (mAdapter.resultList.size() > 0)
-                                mAdapter.resultList.add("footer");
+                            if (mAutoCompleteAdapter.resultList.size() > 0)
+                                mAutoCompleteAdapter.resultList.add("footer");
 
                             // Post to Main Thread
                             mThreadHandler.sendEmptyMessage(1);
@@ -450,62 +478,109 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         });
     }
 
-/**
- * Get current address async task
- * Result: formatted address e.g 1 Cong Hoa st, Tan Binh district, Ho Chi Minh city...
- */
-private class GetCurrentAddressAsyncTask extends AsyncTask<Location, Integer, Place> {
-
-    @Override
-    protected void onPreExecute() {
-
+    private void setupResultRecycleView() {
+        mRvResults.setHasFixedSize(true);
+        LinearLayoutManager llm = new LinearLayoutManager(getActivity());
+        mRvResults.setLayoutManager(llm);
+        mAdapter = new SearchResultAdapter(listResults, mRvResults, getActivity());
+        mRvResults.setAdapter(mAdapter);
+        mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                SearchTask task = new SearchTask();
+                task.execute(CommonData.currentSearchOption);
+            }
+        });
     }
 
-    @Override
-    protected Place doInBackground(Location... params) {
-        // TODO Auto-generated method stub
-        return mGeocodingRequest.geocoding(params[0]);
-    }
+    /**
+     * Get current address async task
+     * Result: formatted address e.g 1 Cong Hoa st, Tan Binh district, Ho Chi Minh city...
+     */
+    private class GetCurrentAddressAsyncTask extends AsyncTask<Location, Integer, Place> {
 
-    protected void onPostExecute(Place result) {
-        if (result != null) {
-            Toast.makeText(getActivity(), "Your location is" + result.getFormatted_address(), Toast.LENGTH_SHORT).show();
-            doAfterGetCurrentLocation();
+        @Override
+        protected void onPreExecute() {
+
+        }
+
+        @Override
+        protected Place doInBackground(Location... params) {
+            // TODO Auto-generated method stub
+            return mGeocodingRequest.geocoding(params[0]);
+        }
+
+        protected void onPostExecute(Place result) {
+            if (result != null) {
+                Toast.makeText(getActivity(), "Your location is" + result.getFormatted_address(), Toast.LENGTH_SHORT).show();
+                doAfterGetCurrentLocation();
+            }
+        }
+
+        protected void onProgressUpdate(Integer... progress) {
         }
     }
 
-    protected void onProgressUpdate(Integer... progress) {
-    }
-}
+    /**
+     * Get place's latitude and longitude from place id
+     */
+    private class GetPlaceLatLngAsyncTask extends AsyncTask<String, Integer, Place> {
 
-/**
- * Get place's latitude and longitude from place id
- */
-private class GetPlaceLatLngAsyncTask extends AsyncTask<String, Integer, Place> {
+        @Override
+        protected void onPreExecute() {
 
-    @Override
-    protected void onPreExecute() {
+        }
 
-    }
+        @Override
+        protected Place doInBackground(String... params) {
+            // TODO Auto-generated method stub
+            return mPlaceDetailRequest.placeDetail(params[0]);
+        }
 
-    @Override
-    protected Place doInBackground(String... params) {
-        // TODO Auto-generated method stub
-        return mPlaceDetailRequest.placeDetail(params[0]);
-    }
+        protected void onPostExecute(Place result) {
+            if (result != null) {
+                Toast.makeText(getActivity(), "Your location is: " + result.getLat() + "\n" + result.getLng(), Toast.LENGTH_SHORT).show();
+                mSearchLocation = new Location(LocationManager.NETWORK_PROVIDER);
+                mSearchLocation.setLatitude(result.getLat());
+                mSearchLocation.setLongitude(result.getLng());
+                CommonData.searchLocation = mSearchLocation;
+                CommonData.currentSearchOption.setLocation(mSearchLocation);
+            }
+        }
 
-    protected void onPostExecute(Place result) {
-        if (result != null) {
-            Toast.makeText(getActivity(), "Your location is: " + result.getLat() + "\n" + result.getLng(), Toast.LENGTH_SHORT).show();
-            mSearchLocation = new Location(LocationManager.NETWORK_PROVIDER);
-            mSearchLocation.setLatitude(result.getLat());
-            mSearchLocation.setLongitude(result.getLng());
-            CommonData.searchLocation = mSearchLocation;
-            CommonData.currentSearchOption.setLocation(mSearchLocation);
+        protected void onProgressUpdate(Integer... progress) {
         }
     }
 
-    protected void onProgressUpdate(Integer... progress) {
+    private class SearchTask extends AsyncTask<SearchOptions, Integer, ArrayList<Place>> {
+        @Override
+        protected void onPreExecute() {
+            if (CommonData.currentSearchOption.canLoadMore() && listResults.size() > 0) {
+                listResults.add(null);
+                mAdapter.notifyItemInserted(listResults.size() - 1);
+            }
+        }
+
+        @Override
+        protected ArrayList<Place> doInBackground(SearchOptions... searchOptions) {
+            PlaceNearBySearchRequest request = new PlaceNearBySearchRequest();
+            return request.placeNearBy(searchOptions[0]);
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Place> result) {
+            if (listResults.size() > 1 && listResults.get(listResults.size() - 1) == null) {
+                listResults.remove(listResults.size() - 1);
+                mAdapter.notifyItemRemoved(listResults.size());
+            }
+            if (result != null) {
+                for (Place p : result) {
+                    listResults.add(p);
+                }
+                LogUtil.log("Search result", listResults.toString());
+                mAdapter.notifyDataSetChanged();
+                mAdapter.setLoaded();
+            }
+        }
     }
-}
 }
