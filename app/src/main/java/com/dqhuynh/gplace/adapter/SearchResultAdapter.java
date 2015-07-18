@@ -6,9 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dqhuynh.gplace.R;
 import com.dqhuynh.gplace.callback.OnLoadMoreListener;
@@ -35,7 +36,9 @@ public class SearchResultAdapter extends RecyclerView.Adapter {
     private int lastVisibleItem, totalItemCount;
     private boolean loading;
     private OnLoadMoreListener onLoadMoreListener;
+    public OnItemClickListener mOnItemClickListener;
     private DisplayImageOptions options;
+    private int lastPosition = -1;
     ImageLoader imageLoader;
 
     public SearchResultAdapter(ArrayList<Place> places, RecyclerView recyclerView,
@@ -102,10 +105,17 @@ this.mContext = context;
         loading = false;
     }
 
+    public interface OnItemClickListener {
+        public void onItemClick(Place place);
+    }
+
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         this.onLoadMoreListener = onLoadMoreListener;
     }
 
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.mOnItemClickListener = onItemClickListener;
+    }
     @Override
     public int getItemViewType(int position) {
         return placeList.get(position) != null ? VIEW_ITEM : VIEW_PROG;
@@ -116,8 +126,19 @@ this.mContext = context;
 //            imageLoader = AppController.getInstance().getImageLoader(mContext);
         if (holder instanceof PlaceHolder) {
 
-            Place singlePlace = (Place) placeList.get(position);
-
+            final Place singlePlace = (Place) placeList.get(position);
+            if(position > lastPosition) {
+                Animation animation = AnimationUtils.loadAnimation(mContext,
+                        R.anim.up_from_bottom);
+                holder.itemView.startAnimation(animation);
+            }
+            lastPosition = position;
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mOnItemClickListener.onItemClick(singlePlace);
+                }
+            });
             ((PlaceHolder) holder).tvName.setText(singlePlace.getName());
 //            ((PlaceHolder) holder).ivPhoto.setImageUrl(singlePlace.getIcon(), imageLoader);
             ImageLoader.getInstance().displayImage(singlePlace.getIcon(), ((PlaceHolder) holder).ivPhoto, options);
@@ -130,7 +151,6 @@ this.mContext = context;
 
         }
     }
-
     // Return the size arraylist
     @Override
     public int getItemCount() {
@@ -145,7 +165,6 @@ this.mContext = context;
         public TextView tvAddress;
 
         public Place singePlace;
-
         public PlaceHolder(View itemLayoutView) {
             super(itemLayoutView);
 //            ivPhoto = (NetworkImageView) itemLayoutView.findViewById(R.id.place_photo);
@@ -154,18 +173,17 @@ this.mContext = context;
 
             tvAddress = (TextView) itemLayoutView.findViewById(R.id.place_address);
             // Onclick event for the row to show the data in toast
-            itemLayoutView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                    Toast.makeText(
-                            v.getContext(),
-                            "Data : \n" + singePlace.getName() + " \n"
-                                    + singePlace.getFormatted_address(),
-                            Toast.LENGTH_SHORT).show();
-
-                }
-            });
+//            itemLayoutView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    Toast.makeText(
+//                            v.getContext(),
+//                            "Data : \n" + singePlace.getName() + " \n"
+//                                    + singePlace.getFormatted_address(),
+//                            Toast.LENGTH_SHORT).show();
+//
+//                }
+//            });
 
         }
 

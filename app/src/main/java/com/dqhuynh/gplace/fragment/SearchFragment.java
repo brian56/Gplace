@@ -13,7 +13,6 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -82,6 +82,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private SlidingUpPanel mSlidingUpPanel;
     private GetPlaceLatLngAsyncTask mGetPlaceLatLngTask;
     private Dialog.Builder builder = null;
+    private LinearLayout mLlLoadingResult;
     public static ArrayList<PlaceType> selectedPlaceTypes;
     private String sortBy = "";
     private int distance = 5;
@@ -123,13 +124,35 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mSeekBarRadius = (SeekBar) view.findViewById(R.id.seekBarRadius);
         mSeekBarRadius.setEnabled(!radDistance.isChecked());
         mBtnSearch = (Button) view.findViewById(R.id.btnSearch);
+        mLlLoadingResult = (LinearLayout) view.findViewById(R.id.llLoadingResult);
         mBtnSearch.setOnClickListener(this);
         mClearText.setOnClickListener(this);
         mRvResults = (RecyclerView) view.findViewById(R.id.rvResults);
         mSlidingUpPanel = (SlidingUpPanel) view.findViewById(R.id.searchPanel);
+        mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
+                R.anim.zoom_in);
+        mZoomOutAnimation = AnimationUtils.loadAnimation(getActivity(),
+                R.anim.zoom_out);
         setupPanel();
         setupResultRecycleView();
+        setupSortBy();
+        setupRadius();
+        setupPlaceAutoCompleteView();
+        mbtnAddPlaceType.setOnClickListener(this);
 
+        if (CommonData.currentLocation != null) {
+            mbtnCurrentLocation.setVisibility(View.VISIBLE);
+            mPgCurrentLocation.setVisibility(View.GONE);
+        }
+        getLocationOnStart();
+        return view;
+    }
+
+    public void setupPanel() {
+//        mSlidingUpPanel.openPanel();
+        mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48+8));
+    }
+    public void setupSortBy() {
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -151,6 +174,8 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         };
         radProminence.setOnCheckedChangeListener(listener);
         radDistance.setOnCheckedChangeListener(listener);
+    }
+    public void setupRadius() {
         mSeekBarRadius.setProgress(5);
         mSeekBarRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -174,39 +199,21 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
             }
         });
-        mbtnAddPlaceType.setOnClickListener(this);
-
-        if (CommonData.currentLocation != null) {
-            mbtnCurrentLocation.setVisibility(View.VISIBLE);
-//            mProgressCurrentLocation.setVisibility(View.GONE);
-            mPgCurrentLocation.setVisibility(View.GONE);
-        }
-        mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
-                R.anim.zoom_in);
-        mZoomOutAnimation = AnimationUtils.loadAnimation(getActivity(),
-                R.anim.zoom_out);
-        String text = "";
-        if (getArguments() != null && getArguments().containsKey(ARG_TEXT)) {
-            text = getArguments().getString(ARG_TEXT);
-            if (TextUtils.isEmpty(text)) text = "";
-        }
-        getLocationOnStart();
-        setupPlaceAutoCompleteView();
-        return view;
     }
 
-    public void setupPanel() {
-//        mSlidingUpPanel.openPanel();
-        mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48+8));
-    }
+
     public void doSearch() {
+        CommonData.currentSearchOption.setPageToken("");
+        listResults.clear();
+        mAdapter.notifyDataSetChanged();
+        mLlLoadingResult.setVisibility(View.VISIBLE);
         SearchTask task = new SearchTask();
         task.execute(CommonData.currentSearchOption);
     }
     /**
      * Load default/saved search options on start/resume
      */
-    private void loadSearchOptions() {
+    private void loadSavedSearchOptions() {
 
     }
 
@@ -219,7 +226,6 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     @Override
     public void onResume() {
         super.onResume();
-        CommonData.currentSearchOption.setPageToken("");
     }
 
     @Override
@@ -272,7 +278,6 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     @Override
     public void onLocationReceiver() {
-        // create class object
         getLocationOnStart();
     }
 
@@ -483,7 +488,16 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
         mRvResults.setLayoutManager(llm);
         mAdapter = new SearchResultAdapter(listResults, mRvResults, getActivity());
-        mRvResults.setAdapter(mAdapter);
+        mAdapter.setOnItemClickListener(new SearchResultAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Place place) {
+                Toast.makeText(
+                        getActivity(),
+                        "Data : \n" + place.getName() + " \n"
+                                + place.getFormatted_address(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
         mAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
             @Override
             public void onLoadMore() {
@@ -491,6 +505,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 task.execute(CommonData.currentSearchOption);
             }
         });
+        mRvResults.setAdapter(mAdapter);
     }
 
     /**
@@ -569,6 +584,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
         @Override
         protected void onPostExecute(ArrayList<Place> result) {
+            mLlLoadingResult.setVisibility(View.GONE);
             if (listResults.size() > 1 && listResults.get(listResults.size() - 1) == null) {
                 listResults.remove(listResults.size() - 1);
                 mAdapter.notifyItemRemoved(listResults.size());
@@ -576,9 +592,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             if (result != null) {
                 for (Place p : result) {
                     listResults.add(p);
+                    mAdapter.notifyItemInserted(listResults.size()-1);
                 }
                 LogUtil.log("Search result", listResults.toString());
-                mAdapter.notifyDataSetChanged();
                 mAdapter.setLoaded();
             }
         }
