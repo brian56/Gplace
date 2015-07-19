@@ -28,4 +28,5 @@ dependencies {
     compile 'org.apmem.tools:layouts:1.9@aar'
     compile 'com.marshalchen.ultimaterecyclerview:library:0.3.10'
     compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.4'
+
 }

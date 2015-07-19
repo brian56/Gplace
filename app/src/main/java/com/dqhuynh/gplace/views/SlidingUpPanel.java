@@ -280,9 +280,10 @@ public class SlidingUpPanel extends ViewGroup {
 				final int top = getPaddingTop() + lp.topMargin;
 				child.layout(left, top, left + width, top + height);
 				if (mIsOpen) {
-					scrollTo(0, height);
+//					scrollTo(0, height);
 					mIsOpen = false;
-					openPanel(true);
+					openPanel(false);
+                    LogUtil.log(TAG, "onLayout dasdada");
 				}
 			}
 		}

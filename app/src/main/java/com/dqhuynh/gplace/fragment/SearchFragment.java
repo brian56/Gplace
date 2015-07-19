@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -138,6 +139,13 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         setupSortBy();
         setupRadius();
         setupPlaceAutoCompleteView();
+        view.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                onKeyDown(keyCode, event);
+                return true;
+            }
+        });
         mbtnAddPlaceType.setOnClickListener(this);
 
         if (CommonData.currentLocation != null) {
@@ -206,6 +214,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         CommonData.currentSearchOption.setPageToken("");
         listResults.clear();
         mAdapter.notifyDataSetChanged();
+        mRvResults.removeAllViews();
         mLlLoadingResult.setVisibility(View.VISIBLE);
         SearchTask task = new SearchTask();
         task.execute(CommonData.currentSearchOption);
@@ -274,6 +283,18 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 }
                 break;
         }
+    }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                if(!mSlidingUpPanel.isOpen()) {
+                    mSlidingUpPanel.openPanel(false);
+                }
+                break;
+        }
+        return false;
     }
 
     @Override
