@@ -1,6 +1,7 @@
 package com.dqhuynh.gplace.fragment;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
@@ -9,13 +10,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
+import android.speech.RecognizerIntent;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,6 +48,7 @@ import com.dqhuynh.gplace.utils.GPSTracker;
 import com.dqhuynh.gplace.utils.LogUtil;
 import com.dqhuynh.gplace.views.SlidingUpPanel;
 import com.kisstools.KissTools;
+import com.kisstools.utils.CommonUtil;
 import com.kisstools.utils.DeviceUtil;
 import com.rey.material.app.Dialog;
 import com.rey.material.widget.Button;
@@ -56,10 +58,13 @@ import com.rey.material.widget.RadioButton;
 import org.apmem.tools.layouts.FlowLayout;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class SearchFragment extends Fragment implements LocationListenerCallback, View.OnClickListener {
     private static final String TAG = SearchFragment.class.getSimpleName();
     private static final String ARG_TEXT = "text";
+    private final int REQ_CODE_SPEECH_INPUT = 100;
+    private final int REQ_DIALOG_PLACE_TYPE = 1;
 
     private GeocodingRequest mGeocodingRequest = new GeocodingRequest();
     private PlaceDetailRequest mPlaceDetailRequest = new PlaceDetailRequest();
@@ -69,6 +74,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private Animation mZoomOutAnimation;
     private Animation mZoomInAnimation;
     private ImageView mbtnCurrentLocation;
+    private ImageView mbtnSpeechInput;
     private ProgressBar mProgressCurrentLocation;
     private ProgressView mPgCurrentLocation;
     private FlowLayout mPlaceTypeContainer;
@@ -126,8 +132,10 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mSeekBarRadius.setEnabled(!radDistance.isChecked());
         mBtnSearch = (Button) view.findViewById(R.id.btnSearch);
         mLlLoadingResult = (LinearLayout) view.findViewById(R.id.llLoadingResult);
+        mbtnSpeechInput = (ImageView) view.findViewById(R.id.btnSpeechToText);
         mBtnSearch.setOnClickListener(this);
         mClearText.setOnClickListener(this);
+        mbtnSpeechInput.setOnClickListener(this);
         mRvResults = (RecyclerView) view.findViewById(R.id.rvResults);
         mSlidingUpPanel = (SlidingUpPanel) view.findViewById(R.id.searchPanel);
         mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
@@ -139,13 +147,6 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         setupSortBy();
         setupRadius();
         setupPlaceAutoCompleteView();
-        view.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                onKeyDown(keyCode, event);
-                return true;
-            }
-        });
         mbtnAddPlaceType.setOnClickListener(this);
 
         if (CommonData.currentLocation != null) {
@@ -156,10 +157,30 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         return view;
     }
 
+    /**
+     * Showing google speech input dialog
+     */
+    private void promptSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.search_around_here));
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getActivity(),
+                    getString(R.string.action_example),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public void setupPanel() {
 //        mSlidingUpPanel.openPanel();
-        mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48+8));
+        mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48 + 8));
     }
+
     public void setupSortBy() {
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
 
@@ -183,6 +204,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         radProminence.setOnCheckedChangeListener(listener);
         radDistance.setOnCheckedChangeListener(listener);
     }
+
     public void setupRadius() {
         mSeekBarRadius.setProgress(5);
         mSeekBarRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -219,6 +241,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         SearchTask task = new SearchTask();
         task.execute(CommonData.currentSearchOption);
     }
+
     /**
      * Load default/saved search options on start/resume
      */
@@ -234,17 +257,50 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     @Override
     public void onResume() {
+//        getView().setFocusableInTouchMode(true);
+//        getView().requestFocus();
+//        getView().setOnKeyListener(new View.OnKeyListener() {
+//            @Override
+//            public boolean onKey(View v, int keyCode, KeyEvent event) {
+//
+//                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
+//                    // handle back button's click listener
+//                    if (!mSlidingUpPanel.isOpen()) {
+//                        mSlidingUpPanel.openPanel(false);
+//                    }
+//                    return true;
+//                }
+//                return false;
+//            }
+//        });
         super.onResume();
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Stuff to do, dependent on requestCode and resultCode
-        if (requestCode == 1) {
-            // This is the return result of your DialogFragment
-            if (resultCode == DIALOG_RESULT_CODE) {
-                CommonData.currentSearchOption.setPlaceTypes(selectedPlaceTypes);
-                addPlaceTypeToContainer();
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == Activity.RESULT_OK && null != data) {
+
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+//                    getView().setFocusableInTouchMode(false);
+//                    getView().clearFocus();
+                    autoCompleteView.requestFocus();
+                    CommonUtil.hideIME(getActivity(), autoCompleteView);
+                    autoCompleteView.setText(result.get(0));
+                    autoCompleteView.setSelection(autoCompleteView.getText().length(),autoCompleteView.getText().length());
+                }
+                break;
+            }
+            case REQ_DIALOG_PLACE_TYPE: {
+                // This is the return result of your DialogFragment
+                if (resultCode == DIALOG_RESULT_CODE) {
+                    CommonData.currentSearchOption.setPlaceTypes(selectedPlaceTypes);
+                    addPlaceTypeToContainer();
+                }
+                break;
             }
         }
     }
@@ -254,6 +310,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mPlaceTypeContainer.requestFocus();
         android.support.v4.app.FragmentManager fm = getActivity().getSupportFragmentManager();
         switch (v.getId()) {
+            case R.id.btnSpeechToText:
+                promptSpeechInput();
+                break;
             case R.id.btnClearText:
                 autoCompleteView.setText("");
                 if (CommonData.currentLocation != null) {
@@ -264,7 +323,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 break;
             case R.id.btnAddPlaceType:
                 PlaceTypeDialogFragment p = new PlaceTypeDialogFragment();
-                p.setTargetFragment(this, 1);
+                p.setTargetFragment(this, REQ_DIALOG_PLACE_TYPE);
                 p.show(fm, "place_type");
                 break;
             case R.id.btnSearch:
@@ -274,7 +333,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 //                    Fragment mFragment = new SearchResultFragment();
 //                    MainActivity main = (MainActivity) getActivity();
 //                    main.setFragmentChild(mFragment, "Result");
-                    if(mSlidingUpPanel.isOpen()) {
+                    if (mSlidingUpPanel.isOpen()) {
                         mSlidingUpPanel.closePanel();
                     } else {
                         mSlidingUpPanel.openPanel(false);
@@ -283,18 +342,6 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 }
                 break;
         }
-    }
-
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_BACK:
-                if(!mSlidingUpPanel.isOpen()) {
-                    mSlidingUpPanel.openPanel(false);
-                }
-                break;
-        }
-        return false;
     }
 
     @Override
@@ -473,6 +520,15 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 final String value = s.toString();
+                if(value.equals("")) {
+                    autoCompleteView.setHint("Search around here");
+                    mbtnSpeechInput.setVisibility(View.VISIBLE);
+                    mClearText.setVisibility(View.GONE);
+                }
+                else {
+                    mbtnSpeechInput.setVisibility(View.GONE);
+                    mClearText.setVisibility(View.VISIBLE);
+                }
 
                 // Remove all callbacks and messages
                 mThreadHandler.removeCallbacksAndMessages(null);
@@ -613,7 +669,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             if (result != null) {
                 for (Place p : result) {
                     listResults.add(p);
-                    mAdapter.notifyItemInserted(listResults.size()-1);
+                    mAdapter.notifyItemInserted(listResults.size() - 1);
                 }
                 LogUtil.log("Search result", listResults.toString());
                 mAdapter.setLoaded();
