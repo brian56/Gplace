@@ -3,43 +3,51 @@
              xmlns:app="http://schemas.android.com/apk/res-auto"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
-             android:padding="@dimen/padding_medium"
              android:layout_marginRight="48dp"
              android:orientation="vertical"
              android:background="@color/background_material_light"
              tools:context="com.dqhuynh.gplace.ui.MainActivity$PlaceholderFragment">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rvResults"
-        android:visibility="visible"
-        android:layout_marginTop="56dp"
+    <FrameLayout
+        android:id="@+id/mainPanel"
+        android:padding="@dimen/padding_medium"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical"/>
-
-    <LinearLayout
-        android:id="@+id/llLoadingResult"
-        android:visibility="gone"
-        android:layout_marginTop="56dp"
-        android:layout_width="match_parent"
+        android:foreground="@color/colorControlNormal"
         android:layout_height="match_parent">
 
-        <com.rey.material.widget.ProgressView
-            android:id="@+id/progressLoadingResult"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rvResults"
+            android:visibility="visible"
+            android:layout_marginTop="56dp"
             android:layout_width="match_parent"
-            android:layout_height="36dp"
-            android:layout_gravity="center"
-            android:layout_centerInParent="true"
-            app:pv_autostart="true"
-            app:pv_circular="true"
-            app:pv_progressStyle="@style/ColorsCircularProgressDrawableStyle"
-            app:pv_progressMode="indeterminate"/>
+            android:layout_height="match_parent"
+            android:scrollbars="vertical"/>
 
-    </LinearLayout>
+        <LinearLayout
+            android:id="@+id/llLoadingResult"
+            android:visibility="gone"
+            android:layout_marginTop="56dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <com.rey.material.widget.ProgressView
+                android:id="@+id/progressLoadingResult"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_gravity="center"
+                android:layout_centerInParent="true"
+                app:pv_autostart="true"
+                app:pv_circular="true"
+                app:pv_progressStyle="@style/ColorsCircularProgressDrawableStyle"
+                app:pv_progressMode="indeterminate"/>
+
+        </LinearLayout>
+    </FrameLayout>
 
     <com.dqhuynh.gplace.views.SlidingUpPanel
         android:id="@+id/searchPanel"
         android:visibility="visible"
+        android:padding="@dimen/padding_medium"
         android:layout_marginBottom="64dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -130,6 +138,7 @@
                                     android:src="@drawable/common_signin_btn_icon_normal_dark"
                                     android:layout_centerVertical="true"
                                     android:layout_alignParentRight="true"/>
+
                                 <ImageView
                                     android:id="@+id/btnSpeechToText"
                                     android:layout_width="24dp"

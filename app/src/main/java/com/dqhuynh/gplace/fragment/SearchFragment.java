@@ -16,7 +16,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +27,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -87,6 +90,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private RadioButton radProminence;
     private RadioButton radDistance;
     private SlidingUpPanel mSlidingUpPanel;
+    private FrameLayout mMainPanel;
     private GetPlaceLatLngAsyncTask mGetPlaceLatLngTask;
     private Dialog.Builder builder = null;
     private LinearLayout mLlLoadingResult;
@@ -133,16 +137,18 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mBtnSearch = (Button) view.findViewById(R.id.btnSearch);
         mLlLoadingResult = (LinearLayout) view.findViewById(R.id.llLoadingResult);
         mbtnSpeechInput = (ImageView) view.findViewById(R.id.btnSpeechToText);
-        mBtnSearch.setOnClickListener(this);
-        mClearText.setOnClickListener(this);
-        mbtnSpeechInput.setOnClickListener(this);
         mRvResults = (RecyclerView) view.findViewById(R.id.rvResults);
         mSlidingUpPanel = (SlidingUpPanel) view.findViewById(R.id.searchPanel);
+        mMainPanel = (FrameLayout) view.findViewById(R.id.mainPanel);
         mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.zoom_in);
         mZoomOutAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.zoom_out);
-        setupPanel();
+        mMainPanel.getForeground().setAlpha(0);
+        mBtnSearch.setOnClickListener(this);
+        mClearText.setOnClickListener(this);
+        mbtnSpeechInput.setOnClickListener(this);
+        setupSlidePanel();
         setupResultRecycleView();
         setupSortBy();
         setupRadius();
@@ -176,9 +182,22 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         }
     }
 
-    public void setupPanel() {
+    public void setupSlidePanel() {
 //        mSlidingUpPanel.openPanel();
         mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48 + 8));
+        mSlidingUpPanel.setOnPanelScrolledListener(new SlidingUpPanel.OnPanelScrollListener() {
+            @Override
+            public void onPanelScrolled(float offset) {
+                Log.d(TAG, "onPanelScrolled offset=" + offset);
+                float i = 1f - offset;
+                if (i > 0.7f)
+                    i = 0.7f;
+                if (i < 0.4)
+                    i = 0;
+                Log.d(TAG, "onPanelScrolled alpha=" + (int) (i * 255));
+                mMainPanel.getForeground().setAlpha((int) (i * 255));
+            }
+        });
     }
 
     public void setupSortBy() {
@@ -234,9 +253,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     public void doSearch() {
         CommonData.currentSearchOption.setPageToken("");
+        mRvResults.removeAllViews();
         listResults.clear();
         mAdapter.notifyDataSetChanged();
-        mRvResults.removeAllViews();
         mLlLoadingResult.setVisibility(View.VISIBLE);
         SearchTask task = new SearchTask();
         task.execute(CommonData.currentSearchOption);
@@ -255,24 +274,47 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     }
 
+    public void setBackPressToClosePanel() {
+        if (!mSlidingUpPanel.isOpen()) {
+            getView().setFocusableInTouchMode(true);
+            getView().requestFocus();
+            getView().setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+
+                    if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK) {
+                        // handle back button's click listener
+                        if (!mSlidingUpPanel.isOpen()) {
+                            mSlidingUpPanel.openPanel(false);
+                        }
+                        getView().setFocusableInTouchMode(false);
+                        getView().clearFocus();
+                        getView().setOnKeyListener(new View.OnKeyListener() {
+                            @Override
+                            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                                return true;
+                            }
+                        });
+                        return true;
+                    }
+                    return false;
+                }
+            });
+        } else {
+            getView().setFocusableInTouchMode(false);
+            getView().clearFocus();
+            getView().setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    return true;
+                }
+            });
+        }
+    }
+
     @Override
     public void onResume() {
-//        getView().setFocusableInTouchMode(true);
-//        getView().requestFocus();
-//        getView().setOnKeyListener(new View.OnKeyListener() {
-//            @Override
-//            public boolean onKey(View v, int keyCode, KeyEvent event) {
-//
-//                if (event.getAction() == KeyEvent.ACTION_UP && keyCode == KeyEvent.KEYCODE_BACK){
-//                    // handle back button's click listener
-//                    if (!mSlidingUpPanel.isOpen()) {
-//                        mSlidingUpPanel.openPanel(false);
-//                    }
-//                    return true;
-//                }
-//                return false;
-//            }
-//        });
+        setBackPressToClosePanel();
         super.onResume();
     }
 
@@ -290,7 +332,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                     autoCompleteView.requestFocus();
                     CommonUtil.hideIME(getActivity(), autoCompleteView);
                     autoCompleteView.setText(result.get(0));
-                    autoCompleteView.setSelection(autoCompleteView.getText().length(),autoCompleteView.getText().length());
+                    autoCompleteView.setSelection(autoCompleteView.getText().length(), autoCompleteView.getText().length());
                 }
                 break;
             }
@@ -335,10 +377,13 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 //                    main.setFragmentChild(mFragment, "Result");
                     if (mSlidingUpPanel.isOpen()) {
                         mSlidingUpPanel.closePanel();
+//                        mMainPanel.getForeground().setAlpha(180);
                     } else {
+//                        mMainPanel.getForeground().setAlpha(0);
                         mSlidingUpPanel.openPanel(false);
                         doSearch();
                     }
+                    setBackPressToClosePanel();
                 }
                 break;
         }
@@ -368,37 +413,11 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 btn.setLayoutParams(params);
                 btn.setGravity(Gravity.CENTER);
                 btn.setPadding(8, 8, 8, 8);
-                btn.setFocusableInTouchMode(true);
-                btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-                    @Override
-                    public void onFocusChange(View v, boolean hasFocus) {
-                        TextView v1 = (TextView) v;
-                        if (hasFocus) {
-                            v1.setBackgroundResource(R.drawable.bg_blue);
-                            FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT);
-                            params.setMargins(0, 8, 8, 0); // change this to your liking
-                            v1.setLayoutParams(params);
-                            v1.setGravity(Gravity.CENTER);
-                            v1.setPadding(8, 8, 8, 8);
-                        } else {
-                            v1.setBackgroundResource(R.drawable.bg_grey);
-                            FlowLayout.LayoutParams params = new FlowLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT);
-                            params.setMargins(0, 8, 8, 0); // change this to your liking
-                            v1.setLayoutParams(params);
-                            v1.setGravity(Gravity.CENTER);
-                            v1.setPadding(8, 8, 8, 8);
-                        }
-                    }
-                });
                 btn.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (v.isFocused()) {
-                            selectedPlaceTypes.remove(v.getTag());
-                            v.setVisibility(View.GONE);
-                        }
+                        selectedPlaceTypes.remove(v.getTag());
+                        v.setVisibility(View.GONE);
                     }
                 });
                 mPlaceTypeContainer.addView(btn);
@@ -520,12 +539,11 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 final String value = s.toString();
-                if(value.equals("")) {
+                if (value.equals("")) {
                     autoCompleteView.setHint("Search around here");
                     mbtnSpeechInput.setVisibility(View.VISIBLE);
                     mClearText.setVisibility(View.GONE);
-                }
-                else {
+                } else {
                     mbtnSpeechInput.setVisibility(View.GONE);
                     mClearText.setVisibility(View.VISIBLE);
                 }
@@ -550,7 +568,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                             mThreadHandler.sendEmptyMessage(1);
                         }
                     }
-                }, 500);
+                }, 300);
             }
 
             @Override
