@@ -18,7 +18,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,7 +32,9 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.RadioButton;
 import android.widget.Toast;
+import android.widget.Button;
 
 import com.dqhuynh.gplace.R;
 import com.dqhuynh.gplace.adapter.PlacesAutoCompleteAdapter;
@@ -49,14 +50,12 @@ import com.dqhuynh.gplace.model.PlaceType;
 import com.dqhuynh.gplace.model.SearchOptions;
 import com.dqhuynh.gplace.utils.GPSTracker;
 import com.dqhuynh.gplace.utils.LogUtil;
-import com.dqhuynh.gplace.views.SlidingUpPanel;
 import com.kisstools.KissTools;
 import com.kisstools.utils.CommonUtil;
-import com.kisstools.utils.DeviceUtil;
 import com.rey.material.app.Dialog;
-import com.rey.material.widget.Button;
 import com.rey.material.widget.ProgressView;
-import com.rey.material.widget.RadioButton;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener;
 
 import org.apmem.tools.layouts.FlowLayout;
 
@@ -89,7 +88,8 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private Location mSearchLocation;
     private RadioButton radProminence;
     private RadioButton radDistance;
-    private SlidingUpPanel mSlidingUpPanel;
+//    private SlidingUpPanel mSlidingUpPanel;
+    private SlidingUpPanelLayout mLayout;
     private FrameLayout mMainPanel;
     private GetPlaceLatLngAsyncTask mGetPlaceLatLngTask;
     private Dialog.Builder builder = null;
@@ -138,13 +138,12 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mLlLoadingResult = (LinearLayout) view.findViewById(R.id.llLoadingResult);
         mbtnSpeechInput = (ImageView) view.findViewById(R.id.btnSpeechToText);
         mRvResults = (RecyclerView) view.findViewById(R.id.rvResults);
-        mSlidingUpPanel = (SlidingUpPanel) view.findViewById(R.id.searchPanel);
+        mLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
         mMainPanel = (FrameLayout) view.findViewById(R.id.mainPanel);
         mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.zoom_in);
         mZoomOutAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.zoom_out);
-        mMainPanel.getForeground().setAlpha(0);
         mBtnSearch.setOnClickListener(this);
         mClearText.setOnClickListener(this);
         mbtnSpeechInput.setOnClickListener(this);
@@ -184,18 +183,32 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     public void setupSlidePanel() {
 //        mSlidingUpPanel.openPanel();
-        mSlidingUpPanel.setShowButtonHeight(DeviceUtil.dp2px(48 + 8));
-        mSlidingUpPanel.setOnPanelScrolledListener(new SlidingUpPanel.OnPanelScrollListener() {
+        mLayout.setPanelSlideListener(new PanelSlideListener() {
             @Override
-            public void onPanelScrolled(float offset) {
-                Log.d(TAG, "onPanelScrolled offset=" + offset);
-                float i = 1f - offset;
-                if (i > 0.7f)
-                    i = 0.7f;
-                if (i < 0.4)
-                    i = 0;
-                Log.d(TAG, "onPanelScrolled alpha=" + (int) (i * 255));
-                mMainPanel.getForeground().setAlpha((int) (i * 255));
+            public void onPanelSlide(View panel, float slideOffset) {
+                Log.i(TAG, "onPanelSlide, offset " + slideOffset);
+            }
+
+            @Override
+            public void onPanelExpanded(View panel) {
+                Log.i(TAG, "onPanelExpanded");
+
+            }
+
+            @Override
+            public void onPanelCollapsed(View panel) {
+                Log.i(TAG, "onPanelCollapsed");
+
+            }
+
+            @Override
+            public void onPanelAnchored(View panel) {
+                Log.i(TAG, "onPanelAnchored");
+            }
+
+            @Override
+            public void onPanelHidden(View panel) {
+                Log.i(TAG, "onPanelHidden");
             }
         });
     }
@@ -274,6 +287,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     }
 
+    /*
     public void setBackPressToClosePanel() {
         if (!mSlidingUpPanel.isOpen()) {
             getView().setFocusableInTouchMode(true);
@@ -311,10 +325,10 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             });
         }
     }
+    */
 
     @Override
     public void onResume() {
-        setBackPressToClosePanel();
         super.onResume();
     }
 
@@ -375,15 +389,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 //                    Fragment mFragment = new SearchResultFragment();
 //                    MainActivity main = (MainActivity) getActivity();
 //                    main.setFragmentChild(mFragment, "Result");
-                    if (mSlidingUpPanel.isOpen()) {
-                        mSlidingUpPanel.closePanel();
-//                        mMainPanel.getForeground().setAlpha(180);
-                    } else {
-//                        mMainPanel.getForeground().setAlpha(0);
-                        mSlidingUpPanel.openPanel(false);
-                        doSearch();
-                    }
-                    setBackPressToClosePanel();
+                    if(mLayout.getPanelState()== SlidingUpPanelLayout.PanelState.EXPANDED)
+                        mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    doSearch();
                 }
                 break;
         }

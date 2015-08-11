@@ -1,7 +1,6 @@
 package com.dqhuynh.gplace.fragment;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -9,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.SectionIndexer;
 import android.widget.TextView;
 
@@ -17,8 +18,6 @@ import com.dqhuynh.gplace.model.PlaceType;
 import com.dqhuynh.gplace.utils.LogUtil;
 import com.hb.views.PinnedSectionListView;
 import com.hb.views.PinnedSectionListView.PinnedSectionListAdapter;
-import com.rey.material.widget.Button;
-import com.rey.material.widget.CheckBox;
 
 import java.util.ArrayList;
 
@@ -77,12 +76,16 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
             LogUtil.log(TAG, pl.toString());
         }
 
-        mPinnedListView.setFastScrollEnabled(true);
-        mPinnedListView.setShadowVisible(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            mPinnedListView.setFastScrollAlwaysVisible(true);
-        }
-        mPinnedListView.setAdapter(new FastScrollAdapter(getActivity(), R.layout.row_item_select_place_type));
+        mPinnedListView.setFastScrollEnabled(false);
+//        mPinnedListView.setShadowVisible(false);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+//            mPinnedListView.setFastScrollAlwaysVisible(true);
+//        }
+        FastScrollAdapter adapter = new FastScrollAdapter(getActivity(), R.layout
+                .row_item_select_place_type);
+
+        mPinnedListView.setAdapter(adapter);
+
     }
 
     @Override
@@ -100,7 +103,8 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
         }
     }
 
-    static class SimpleAdapter extends ArrayAdapter<PlaceType> implements PinnedSectionListAdapter {
+    static class SimpleAdapter extends ArrayAdapter<PlaceType> implements
+            PinnedSectionListAdapter {
         private PlaceType mPlaceType;
         private LayoutInflater mInflater;
         Context mContext;
@@ -254,6 +258,7 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
         }
 
     }
+
 
     static class FastScrollAdapter extends SimpleAdapter implements SectionIndexer {
 
