@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Gplace.iml" filepath="$PROJECT_DIR$/Gplace.iml" />
       <module fileurl="file://$PROJECT_DIR$/MaterialNavigationDrawerModule/MaterialNavigationDrawerModule.iml" filepath="$PROJECT_DIR$/MaterialNavigationDrawerModule/MaterialNavigationDrawerModule.iml" />
+      <module fileurl="file://$PROJECT_DIR$/New_Gplace.iml" filepath="$PROJECT_DIR$/New_Gplace.iml" />
       <module fileurl="file://$PROJECT_DIR$/SlidingLibrary/SlidingLibrary.iml" filepath="$PROJECT_DIR$/SlidingLibrary/SlidingLibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

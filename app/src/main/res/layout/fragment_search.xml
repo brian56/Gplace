@@ -5,7 +5,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginRight="48dp"
                 android:orientation="vertical"
-                tools:context="com.dqhuynh.gplace.ui.MainActivity$PlaceholderFragment">
+                tools:context="com.dqhuynh.gplace.ui.MainActivity">
 
     <com.sothree.slidinguppanel.SlidingUpPanelLayout
         android:id="@+id/sliding_layout"
@@ -143,7 +143,7 @@
                                     android:layout_height="24dp"
                                     android:layout_alignParentRight="true"
                                     android:layout_centerVertical="true"
-                                    android:src="@drawable/common_signin_btn_icon_normal_dark"
+                                    android:src="@drawable/common_google_signin_btn_icon_dark_disabled"
                                     android:visibility="gone"/>
 
                                 <ImageView
