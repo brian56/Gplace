@@ -2,6 +2,8 @@ package com.dqhuynh.gplace.common;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.multidex.MultiDex;
+import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 
 import com.android.volley.Request;
@@ -15,7 +17,7 @@ import com.nostra13.universalimageloader.core.assist.QueueProcessingType;
 /**
  * Created by Administrator on 6/25/2015.
  */
-public class AppController extends Application {
+public class AppController extends MultiDexApplication {
     public static final String TAG = AppController.class.getSimpleName();
 
     private RequestQueue mRequestQueue;
@@ -28,7 +30,11 @@ public class AppController extends Application {
         mInstance = this;
         initImageLoader(getApplicationContext());
     }
-
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
     public static void initImageLoader(Context context) {
         // This configuration tuning is custom. You can tune every option, you may tune some of them,
         // or you can create default configuration by

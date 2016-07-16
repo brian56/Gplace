@@ -8,15 +8,17 @@ import java.util.ArrayList;
  * Created by Administrator on 7/6/2015.
  */
 public class SearchOptions {
-    private static final String LOCATION = "location";
-    private static final String RADIUS = "radius";
-    private static final String KEYWORD = "keyword";
-    private static final String LANGUAGE = "language";
-    private static final String NAME = "name";
-    private static final String OPEN_NOW = "opennow";
-    private static final String TYPES = "types";
-    private static final String RANK_BY = "rankby";
-    private static final String PAGE_TOKEN = "pagetoken";
+    public static final String LOCATION = "location";
+    public static final String RADIUS = "radius";
+    public static final String KEYWORD = "keyword";
+    public static final String LANGUAGE = "language";
+    public static final String NAME = "name";
+    public static final String OPEN_NOW = "opennow";
+    public static final String TYPES = "types";
+    public static final String RANK_BY = "rankby";
+    public static final String PAGE_TOKEN = "pagetoken";
+    public static final String DISTANCE = "distance";
+    public static final String PROMINENCE = "prominence";
 
     private Location location = null;
     private int radius = 0;
@@ -24,7 +26,7 @@ public class SearchOptions {
     private String language = "";
     private String name ="";
     private boolean openNow = false;
-    private ArrayList<PlaceType> placeTypes = null;
+    private ArrayList<PlaceType> placeTypes = new ArrayList<PlaceType>();
     private String rankBy = "";
     private String pageToken ="";
 

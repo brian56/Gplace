@@ -77,7 +77,7 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
         }
 
         mPinnedListView.setFastScrollEnabled(false);
-//        mPinnedListView.setShadowVisible(false);
+        mPinnedListView.setShadowVisible(false);
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 //            mPinnedListView.setFastScrollAlwaysVisible(true);
 //        }
@@ -234,6 +234,7 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
                     holder.cbPlaceType.setVisibility(View.GONE);
                     holder.cbSection.setVisibility(View.VISIBLE);
                     holder.cbSection.setTextColor(parent.getResources().getColor(R.color.white));
+                    holder.cbSection.setBackgroundColor(parent.getResources().getColor(R.color.wallet_holo_blue_light));
                     holder.cbSection.setText(placeType.getName());
                 } else {
                     //item

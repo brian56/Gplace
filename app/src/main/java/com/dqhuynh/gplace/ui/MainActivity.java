@@ -2,6 +2,7 @@ package com.dqhuynh.gplace.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBar;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -13,13 +14,14 @@ import com.dqhuynh.gplace.fragment.SearchFragment;
 import com.kisstools.KissTools;
 
 import it.neokree.materialnavigationdrawer.MaterialNavigationDrawer;
+import it.neokree.materialnavigationdrawer.elements.MaterialSection;
+import it.neokree.materialnavigationdrawer.elements.listeners.MaterialSectionListener;
 
 public class MainActivity extends MaterialNavigationDrawer {
     @Override
     public void init(Bundle savedInstanceState) {
         View view = LayoutInflater.from(this).inflate(R.layout.custom_drawer, null);
         setDrawerHeaderCustom(view);
-
 
         // create sections
 //        this.addSection(newSection(getResources().getString(R.string.menu_my_location), new MainFragment()));
@@ -28,7 +30,6 @@ public class MainActivity extends MaterialNavigationDrawer {
         this.addSection(newSection(getResources().getString(R.string.menu_history), new MainFragment()));
         this.addSection(newSection(getResources().getString(R.string.menu_option), new MainFragment()));
 //        this.addSection(newSection("Section", R.drawable.ic_launcher, new MainFragment()).setSectionColor(Color.parseColor("#03a9f4")));
-
         // create bottom section
         this.addBottomSection(newSection(getResources().getString(R.string.menu_about),
                 R.drawable.abc_ic_go_search_api_mtrl_alpha, new Intent(this, Settings.class)));

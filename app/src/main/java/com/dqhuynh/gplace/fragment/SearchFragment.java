@@ -12,6 +12,7 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.speech.RecognizerIntent;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -52,6 +53,7 @@ import com.dqhuynh.gplace.utils.GPSTracker;
 import com.dqhuynh.gplace.utils.LogUtil;
 import com.kisstools.KissTools;
 import com.kisstools.utils.CommonUtil;
+import com.nostra13.universalimageloader.utils.L;
 import com.rey.material.app.Dialog;
 import com.rey.material.widget.ProgressView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -64,7 +66,7 @@ import java.util.Locale;
 
 public class SearchFragment extends Fragment implements LocationListenerCallback, View.OnClickListener {
     private static final String TAG = SearchFragment.class.getSimpleName();
-    private static final String ARG_TEXT = "text";
+    private static final String ARG_TEXT = "search";
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private final int REQ_DIALOG_PLACE_TYPE = 1;
 
@@ -88,6 +90,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private Location mSearchLocation;
     private RadioButton radProminence;
     private RadioButton radDistance;
+    private LinearLayout radiusBlock;
 //    private SlidingUpPanel mSlidingUpPanel;
     private SlidingUpPanelLayout mLayout;
     private FrameLayout mMainPanel;
@@ -121,6 +124,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
         View view = inflater.inflate(R.layout.fragment_search, container, false);
         KissTools.setContext(getActivity());
         autoCompleteView = (AutoCompleteTextView) view.findViewById(R.id.autoCompleteTextView);
@@ -140,6 +144,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mRvResults = (RecyclerView) view.findViewById(R.id.rvResults);
         mLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
         mMainPanel = (FrameLayout) view.findViewById(R.id.mainPanel);
+        radiusBlock = (LinearLayout) view.findViewById(R.id.radiusBlock);
         mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.zoom_in);
         mZoomOutAnimation = AnimationUtils.loadAnimation(getActivity(),
@@ -222,12 +227,14 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 if (isChecked) {
                     radProminence.setChecked(radProminence == buttonView);
                     radDistance.setChecked(radDistance == buttonView);
-                    mSeekBarRadius.setEnabled(!radDistance.isChecked());
                     if (radProminence == buttonView) {
-                        CommonData.currentSearchOption.setRankBy("prominence");
+                        radiusBlock.setVisibility(View.VISIBLE);
+                        mSeekBarRadius.setEnabled(true);
+                        CommonData.currentSearchOption.setRankBy(SearchOptions.PROMINENCE);
                         CommonData.currentSearchOption.setRadius(mSeekBarRadius.getProgress());
                     } else {
-                        CommonData.currentSearchOption.setRankBy("distance");
+                        radiusBlock.setVisibility(View.GONE);
+                        CommonData.currentSearchOption.setRankBy(SearchOptions.DISTANCE);
                         CommonData.currentSearchOption.setRadius(0);
                     }
                 }
@@ -389,6 +396,10 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 //                    Fragment mFragment = new SearchResultFragment();
 //                    MainActivity main = (MainActivity) getActivity();
 //                    main.setFragmentChild(mFragment, "Result");
+                    if(CommonData.currentSearchOption.getRankBy().compareTo(SearchOptions.DISTANCE)==0 && CommonData.currentSearchOption.getPlaceTypes().size()==0){
+                        Toast.makeText(getActivity(), "Please chose a place type!",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
                     if(mLayout.getPanelState()== SlidingUpPanelLayout.PanelState.EXPANDED)
                         mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
                     doSearch();
@@ -404,7 +415,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
     /**
      * Add selected place types to the container view after user chose the dialog
-     */
+    */
     private void addPlaceTypeToContainer() {
         if (selectedPlaceTypes.size() > 0) {
             mPlaceTypeContainer.removeAllViews();
@@ -482,6 +493,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                mPgCurrentLocation.setVisibility(View.GONE);
                 mbtnCurrentLocation.startAnimation(mZoomInAnimation);
             }
 

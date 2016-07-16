@@ -9,17 +9,28 @@
     <dimen name="title_text">16sp</dimen>
     <dimen name="normal_text">14sp</dimen>
 
-    <dimen name="bt_height">28dp</dimen>
+
+
+    <dimen name="btn_small">4dp</dimen>
+    <dimen name="btn_medium">8dp</dimen>
+    <dimen name="btn_large">16dp</dimen>
+    <dimen name="btn_xlarge">36dp</dimen>
+    <dimen name="btn_xxlarge">48dp</dimen>
+
+    <dimen name="btn_width_small">8dp</dimen>
+    <dimen name="btn_width_medium">24dp</dimen>
+    <dimen name="btn_width_large">48dp</dimen>
+    <dimen name="btn_width_xlarge">128dp</dimen>
 
     <dimen name="padding_small">4dp</dimen>
     <dimen name="padding_medium">8dp</dimen>
     <dimen name="padding_large">16dp</dimen>
-    <dimen name="padding_xlarge">24dp</dimen>
+    <dimen name="padding_xlarge">48dp</dimen>
 
     <dimen name="margin_small">4dp</dimen>
     <dimen name="margin_medium">8dp</dimen>
     <dimen name="margin_large">16dp</dimen>
-    <dimen name="margin_xlarge">24dp</dimen>
+    <dimen name="margin_xlarge">48dp</dimen>
 
     <dimen name="textSize_small">14sp</dimen>
     <dimen name="textSize_medium">16sp</dimen>
