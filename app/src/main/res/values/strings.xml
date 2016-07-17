@@ -31,38 +31,119 @@
     
     
     <!--Place type-->
-    <string name="a">AAA</string>
-    <string name="accounting">Accounting</string>
-    <string name="airport">Airport</string>
+    <string name="section_entertainment">Entertainment</string>
     <string name="amusement_park">Amusement park</string>
-
-    <string name="b">BBB</string>
-    <string name="bakery">Bakery</string>
-    <string name="bank">Bank</string>
-    
-    <string name="c">CCC</string>
-    <string name="cafe">Cafe</string>
+    <string name="aquarium">Aquarium</string>
+    <string name="art_gallery">Art gellery</string>
+    <string name="bowling_alley">Bowling alley</string>
     <string name="campground">Campground</string>
-    <string name="car_dealer">car_dealer</string>
-    <string name="car_rental">car_rental</string>
-    <string name="car_repair">car_repair</string>
-    <string name="car_wash">car_wash</string>
-    <string name="casino">casino</string>
-    <string name="cemetery">cemetery</string>
-    <string name="church">church</string>
-    <string name="city_hall">city_hall</string>
-    <string name="clothing_store">clothing_store</string>
-    <string name="convenience_store">convenience_store</string>
-    <string name="courthouse">courthouse</string>
-    
-    <string name="d">DDD</string>
-    <string name="dentist">dentist</string>
-    <string name="department_store">department_store</string>
-    <string name="doctor">doctor</string>
+    <string name="casino">Casino</string>
+    <string name="library">Library</string>
+    <string name="movie_theater">Movie theater</string>
+    <string name="night_club">Night club</string>
+    <string name="park">Park</string>
+    <string name="rv_park">Recreational vehicle park</string>
+    <string name="stadium">Stadium</string>
+    <string name="zoo">Zoo</string>
 
-    <string name="e">EEE</string>
-    <string name="electrician">electrician</string>
-    <string name="electronics_store">electronics_store</string>
-    <string name="embassy">embassy</string>
-    <string name="establishment">establishment</string>
+    <string name="section_shopping">Shopping</string>
+    <string name="bicycle_store">Bicycle store</string>
+    <string name="book_store">Book store</string>
+    <string name="car_dealer">Car dealer</string>
+    <string name="clothing_store">Clothing store</string>
+    <string name="convenience_store">Convenience store</string>
+    <string name="department_store">Department store</string>
+    <string name="electronics_store">Electronics store</string>
+    <string name="florist">Florist</string>
+    <string name="furniture_store">Furniture store</string>
+    <string name="grocery_or_supermarket">Grocery or supermarket</string>
+    <string name="hardware_store">Hardware store</string>
+    <string name="home_goods_store">Home gooods store</string>
+    <string name="jewelry_store">Jewelry store</string>
+    <string name="liquor_store">Liquor store</string>
+    <string name="pet_store">Pet store</string>
+    <string name="shoe_store">Shoe store</string>
+    <string name="shopping_mall">Shopping mall</string>
+    <string name="store">Store</string>
+
+    <string name="section_food_drink">Food and drink</string>
+    <string name="bakery">Bakery</string>
+    <string name="bar">Bar</string>
+    <string name="cafe">Cafe</string>
+    <string name="meal_delivery">Meal delivery</string>
+    <string name="meal_takeaway">Meal takeaway</string>
+    <string name="restaurant">Restaurant</string>
+
+    <string name="section_landscapes">Landscapes</string>
+    <string name="cemetery">Cemetery</string>
+    <string name="church">Church</string>
+    <string name="hindu_temple">Hindu temple</string>
+    <string name="mosque">Mosque</string>
+    <string name="museum">Museum</string>
+    <string name="synagogue">Synagogue</string>
+
+    <string name="section_traffic">Traffic</string>
+    <string name="airport">Airport</string>
+    <string name="bus_station">Bus station</string>
+    <string name="gas_station">Gas station</string>
+    <string name="parking">Parking</string>
+    <string name="subway_station">Subway station</string>
+    <string name="taxi_stand">Taxi stand</string>
+    <string name="train_station">Train station</string>
+    <string name="transit_station">Transit station</string>
+
+
+    <string name="section_finance">Finance</string>
+    <string name="accounting">Accounting</string>
+    <string name="atm">ATM</string>
+    <string name="bank">Bank</string>
+
+
+    <string name="section_organization">Organization</string>
+    <string name="city_hall">City hall</string>
+    <string name="courthouse">Courthouse</string>
+    <string name="embassy">Embassy</string>
+    <string name="fire_station">Fire station</string>
+    <string name="funeral_home">Funeral home</string>
+    <string name="local_government_office">Local goverment office</string>
+    <string name="police">Police</string>
+    <string name="post_office">Post office</string>
+    <string name="school">School</string>
+    <string name="university">University</string>
+
+
+    <string name="section_services">Services</string>
+    <string name="car_rental">Car rental</string>
+    <string name="car_repair">Car repair</string>
+    <string name="car_wash">Car wash</string>
+    <string name="electrician">Electrician</string>
+    <string name="insurance_agency">Insurance agency</string>
+    <string name="laundry">Laudry</string>
+    <string name="lawyer">Lawyer</string>
+    <string name="locksmith">Locksmith</string>
+    <string name="lodging">Lodging</string>
+    <string name="movie_rental">Movie rental</string>
+    <string name="moving_company">Moving company</string>
+    <string name="painter">Painter</string>
+    <string name="plumber">Plumber</string>
+    <string name="real_estate_agency">Real estate agency</string>
+    <string name="roofing_contractor">Roofing contractor</string>
+    <string name="storage">Storage</string>
+    <string name="travel_agency">Travel agency</string>
+
+
+    <string name="section_health_beauty">Health and beauty</string>
+    <string name="beauty_salon">Beauty salon</string>
+    <string name="dentist">Dentist</string>
+    <string name="doctor">Doctor</string>
+    <string name="gym">Gym</string>
+    <string name="hair_care">Hair care</string>
+    <string name="hospital">Hospital</string>
+    <string name="pharmacy">Pharmacy</string>
+    <string name="physiotherapist">Physiotherapist</string>
+    <string name="spa">Spa</string>
+    <string name="veterinary_care">Veterinary care</string>
+
+
+
 </resources>

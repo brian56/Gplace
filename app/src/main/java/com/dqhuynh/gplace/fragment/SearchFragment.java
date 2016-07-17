@@ -609,7 +609,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 Toast.makeText(
                         getActivity(),
                         "Data : \n" + place.getName() + " \n"
-                                + place.getFormatted_address(),
+                                + place.getFormatted_address() + "\n "+ place.getLat() + ", " + place.getLng(),
                         Toast.LENGTH_SHORT).show();
             }
         });

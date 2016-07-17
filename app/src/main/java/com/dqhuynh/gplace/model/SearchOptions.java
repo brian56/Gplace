@@ -2,12 +2,14 @@ package com.dqhuynh.gplace.model;
 
 import android.location.Location;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by Administrator on 7/6/2015.
  */
-public class SearchOptions {
+public class SearchOptions implements Serializable {
+    static final long serialVersionUID = -3010695769693014199L;
     public static final String LOCATION = "location";
     public static final String RADIUS = "radius";
     public static final String KEYWORD = "keyword";

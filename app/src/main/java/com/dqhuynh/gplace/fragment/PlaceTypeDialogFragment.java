@@ -1,6 +1,7 @@
 package com.dqhuynh.gplace.fragment;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -28,8 +29,9 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
     private static final String TAG = PlaceTypeDialogFragment.class.getSimpleName();
     private static final int DIALOG_RESULT_CODE = 1;
     private PinnedSectionListView mPinnedListView;
-    private String[] arrPlaceCode;
-    private String[] arrPlaceName;
+    private String[] arrPlaceTypeCode;
+    private String[] arrPlaceTypeName;
+    private TypedArray arrPlaceTypeIcon;
     //    private ArrayList<PlaceType> arrPlaceType;
     private static ArrayList<PlaceType> arrPlaceType;
     private Button mBtnOk;
@@ -52,19 +54,30 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
     }
 
     private void setupListView() {
-        arrPlaceCode = getActivity().getResources().getStringArray(R.array.place_type_code);
-        arrPlaceName = getActivity().getResources().getStringArray(R.array.place_type_name);
-        int total = arrPlaceCode.length < arrPlaceName.length ? arrPlaceCode.length : arrPlaceName.length;
+        arrPlaceTypeCode = getActivity().getResources().getStringArray(R.array.place_type_code);
+        arrPlaceTypeName = getActivity().getResources().getStringArray(R.array.place_type_name);
+        arrPlaceTypeIcon = getActivity().getResources().obtainTypedArray(R.array.place_type_icon);
+        int total = arrPlaceTypeCode.length < arrPlaceTypeName.length ? arrPlaceTypeCode.length : arrPlaceTypeName.length;
         arrPlaceType = new ArrayList<PlaceType>();
         int sectionPosition = 0;
+        int id = -1;
         for (int i = 0; i < total; i++) {
-            boolean isSection = arrPlaceCode[i].startsWith("section");
+            //get the ID of the drawable
+            try {
+                id = arrPlaceTypeIcon.getResourceId(i, -1);
+                LogUtil.log(TAG, id + "");
+            } catch (ArrayIndexOutOfBoundsException e) {
+                LogUtil.log(TAG,"ArrayIndexOutOfBoundsException");
+            }
+
+            boolean isSection = arrPlaceTypeCode[i].startsWith("section");
             if (isSection && i != 0)
                 sectionPosition++;
-            PlaceType place = new PlaceType(arrPlaceCode[i], arrPlaceName[i], isSection, sectionPosition, i, false, isSection ? PlaceType.SECTION : PlaceType.ITEM);
-            if(SearchFragment.selectedPlaceTypes.size()>0) {
+            PlaceType place = new PlaceType(arrPlaceTypeCode[i], arrPlaceTypeName[i], isSection, sectionPosition, i, false, isSection ? PlaceType.SECTION : PlaceType.ITEM);
+            place.setIconId(id);
+            if (SearchFragment.selectedPlaceTypes.size() > 0) {
                 for (PlaceType p : SearchFragment.selectedPlaceTypes) {
-                    if(place.getCode().equals(p.getCode())) {
+                    if (place.getCode().equals(p.getCode())) {
                         place.setChecked(true);
                         break;
                     }
@@ -72,6 +85,7 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
             }
             arrPlaceType.add(place);
         }
+        arrPlaceTypeIcon.recycle();
         for (PlaceType pl : arrPlaceType) {
             LogUtil.log(TAG, pl.toString());
         }
@@ -93,9 +107,9 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
         switch (v.getId()) {
             case R.id.btnOK:
                 SearchFragment.selectedPlaceTypes.clear();
-                for (int i = 0; i< mPinnedListView.getAdapter().getCount(); i++) {
-                    PlaceType p = (PlaceType)mPinnedListView.getAdapter().getItem(i);
-                    if(p.isChecked())
+                for (int i = 0; i < mPinnedListView.getAdapter().getCount(); i++) {
+                    PlaceType p = (PlaceType) mPinnedListView.getAdapter().getItem(i);
+                    if (p.isChecked())
                         SearchFragment.selectedPlaceTypes.add(p);
                 }
                 getTargetFragment().onActivityResult(getTargetRequestCode(), DIALOG_RESULT_CODE, getActivity().getIntent());
@@ -143,9 +157,12 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
                 sectionPosition++;
             }
         }
-        @Override public int getItemViewType(int position) {
+
+        @Override
+        public int getItemViewType(int position) {
             return getItem(position).getType();
         }
+
         @Override
         public boolean isItemViewTypePinned(int viewType) {
             return viewType == PlaceType.SECTION;
@@ -213,12 +230,12 @@ public class PlaceTypeDialogFragment extends android.support.v4.app.DialogFragme
                     @Override
                     public void onClick(View v) {
                         CheckBox cb = (CheckBox) v;
-                        PlaceType placeType = (PlaceType)cb.getTag();
+                        PlaceType placeType = (PlaceType) cb.getTag();
                         placeType.setChecked(cb.isChecked());
                         if (placeType.isChecked()) {
                             //SearchFragment.selectedPlaceTypes.add(placeType);
                         } else {
-                           // SearchFragment.selectedPlaceTypes.remove(placeType);
+                            // SearchFragment.selectedPlaceTypes.remove(placeType);
                         }
                         LogUtil.log("section: ", placeType.toString());
 //                        notifyDataSetChanged();

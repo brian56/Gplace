@@ -1,9 +1,12 @@
 package com.dqhuynh.gplace.model;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 6/29/2015.
  */
-public class PlaceType {
+public class PlaceType implements Serializable {
+    static final long serialVersionUID = -3010695769693014199L;
     public static final int ITEM = 0;
     public static final int SECTION = 1;
     private String code;
@@ -13,6 +16,7 @@ public class PlaceType {
     private boolean isChecked;
     private int sectionPosition;
     private int listPosition;
+    private int iconId;
     public PlaceType (String code, String name, boolean isSection, int sectionPosition, int listPosition, boolean isChecked, int type) {
         this.code = code;
         this.name = name;
@@ -73,6 +77,14 @@ public class PlaceType {
 
     public int getType() {
         return type;
+    }
+
+    public int getIconId() {
+        return iconId;
+    }
+
+    public void setIconId(int iconId) {
+        this.iconId = iconId;
     }
 
     @Override
