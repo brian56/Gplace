@@ -103,10 +103,12 @@ public class JSONParser {
             status = jsonObj.getString("status");
             if (status.equals("OK")) {
                 try {
+                    //get the token of the next page result
                     CommonData.currentSearchOption.setPageToken(jsonObj.getString("next_page_token"));
                 } catch (JSONException e) {
+                    //there's no more result
+                    CommonData.currentSearchOption.setDone(true);
                     CommonData.currentSearchOption.setPageToken("");
-//                    LogUtil.log(TAG, "JSON exception");
                 }
                 JSONArray result = jsonObj.getJSONArray("results");
                 for (int i = 0; i < result.length(); i++) {

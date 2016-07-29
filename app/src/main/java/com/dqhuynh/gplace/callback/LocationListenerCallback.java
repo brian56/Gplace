@@ -5,4 +5,5 @@ package com.dqhuynh.gplace.callback;
  */
 public interface LocationListenerCallback {
     public abstract void onLocationReceiver();
+    public abstract void onLocationFailed();
 }

@@ -42,7 +42,7 @@ public class SearchResultAdapter extends RecyclerView.Adapter {
     public SearchResultAdapter(ArrayList<Place> places, RecyclerView recyclerView,
                                Context context) {
         this.placeList = places;
-this.mContext = context;
+        this.mContext = context;
         options = new DisplayImageOptions.Builder()
                 .showImageOnLoading(R.drawable.ic_launcher)
                 .showImageForEmptyUri(R.drawable.ic_arrow_drop_down_white_24dp)
@@ -81,7 +81,7 @@ this.mContext = context;
     // Create new views
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent,
-                                                             int viewType) {
+                                                      int viewType) {
         RecyclerView.ViewHolder vh;
         if (viewType == VIEW_ITEM) {
             // create a new view
@@ -99,6 +99,7 @@ this.mContext = context;
         }
         return vh;
     }
+
     public void setLoaded() {
         loading = false;
     }
@@ -114,10 +115,12 @@ this.mContext = context;
     public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
         this.mOnItemClickListener = onItemClickListener;
     }
+
     @Override
     public int getItemViewType(int position) {
         return placeList.get(position) != null ? VIEW_ITEM : VIEW_PROG;
     }
+
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
 //        if (imageLoader == null)
@@ -143,12 +146,13 @@ this.mContext = context;
 
             ((PlaceHolder) holder).tvAddress.setText(singlePlace.getFormatted_address());
 
-            ((PlaceHolder) holder).singePlace= singlePlace;
+            ((PlaceHolder) holder).singePlace = singlePlace;
 
         } else {
 
         }
     }
+
     // Return the size arraylist
     @Override
     public int getItemCount() {
@@ -157,12 +161,13 @@ this.mContext = context;
 
     public class PlaceHolder extends RecyclerView.ViewHolder {
 
-//        public NetworkImageView ivPhoto;
+        //        public NetworkImageView ivPhoto;
         public ImageView ivPhoto;
         public TextView tvName;
         public TextView tvAddress;
 
         public Place singePlace;
+
         public PlaceHolder(View itemLayoutView) {
             super(itemLayoutView);
 //            ivPhoto = (NetworkImageView) itemLayoutView.findViewById(R.id.place_photo);
@@ -186,6 +191,7 @@ this.mContext = context;
         }
 
     }
+
     public class ProgressViewHolder extends RecyclerView.ViewHolder {
         public ProgressView progressBar;
 

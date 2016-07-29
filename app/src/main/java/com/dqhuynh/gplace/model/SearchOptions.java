@@ -31,7 +31,8 @@ public class SearchOptions implements Serializable {
     private ArrayList<PlaceType> placeTypes = new ArrayList<PlaceType>();
     private String rankBy = "";
     private String pageToken ="";
-
+    private Boolean isSearchForList = true;
+    private Boolean isDone = false;
     public SearchOptions() {
 
     }
@@ -51,7 +52,7 @@ public class SearchOptions implements Serializable {
     }
 
     public boolean canLoadMore() {
-        if(pageToken.equals("")) {
+        if(pageToken.equals("")&& isDone) {
             return false;
         }
         return true;
@@ -196,5 +197,29 @@ public class SearchOptions implements Serializable {
 
     public void setPageToken(String pageToken) {
         this.pageToken = pageToken;
+    }
+
+    public boolean isSearchForList() {
+        return isSearchForList;
+    }
+
+    public boolean isSearchForMap() {
+        return !isSearchForList;
+    }
+
+    public void setSearchForMap(Boolean map) {
+        this.isSearchForList = !map;
+    }
+
+    public void setSearchForList(Boolean list) {
+        this.isSearchForList = list;
+    }
+
+    public Boolean getDone() {
+        return isDone;
+    }
+
+    public void setDone(Boolean done) {
+        isDone = done;
     }
 }

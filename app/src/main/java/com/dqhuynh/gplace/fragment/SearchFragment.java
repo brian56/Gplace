@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.speech.RecognizerIntent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -26,16 +27,17 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.RadioButton;
 import android.widget.Toast;
-import android.widget.Button;
 
 import com.dqhuynh.gplace.R;
 import com.dqhuynh.gplace.adapter.PlacesAutoCompleteAdapter;
@@ -51,9 +53,17 @@ import com.dqhuynh.gplace.model.PlaceType;
 import com.dqhuynh.gplace.model.SearchOptions;
 import com.dqhuynh.gplace.utils.GPSTracker;
 import com.dqhuynh.gplace.utils.LogUtil;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.kisstools.KissTools;
 import com.kisstools.utils.CommonUtil;
-import com.nostra13.universalimageloader.utils.L;
 import com.rey.material.app.Dialog;
 import com.rey.material.widget.ProgressView;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
@@ -62,13 +72,17 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout.PanelSlideListener;
 import org.apmem.tools.layouts.FlowLayout;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
-public class SearchFragment extends Fragment implements LocationListenerCallback, View.OnClickListener {
+public class SearchFragment extends Fragment implements LocationListenerCallback, View.OnClickListener, OnMapReadyCallback {
     private static final String TAG = SearchFragment.class.getSimpleName();
     private static final String ARG_TEXT = "search";
     private final int REQ_CODE_SPEECH_INPUT = 100;
     private final int REQ_DIALOG_PLACE_TYPE = 1;
+    private final int VIEW_MODE_MAP = 1;
+    private final int VIEW_MODE_LIST = 0;
+    private int CURRENT_VIEW_MODE = VIEW_MODE_LIST;
 
     private GeocodingRequest mGeocodingRequest = new GeocodingRequest();
     private PlaceDetailRequest mPlaceDetailRequest = new PlaceDetailRequest();
@@ -91,15 +105,14 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     private RadioButton radProminence;
     private RadioButton radDistance;
     private LinearLayout radiusBlock;
-//    private SlidingUpPanel mSlidingUpPanel;
+    private FloatingActionButton mFabSwitchView;
+    //    private SlidingUpPanel mSlidingUpPanel;
     private SlidingUpPanelLayout mLayout;
     private FrameLayout mMainPanel;
     private GetPlaceLatLngAsyncTask mGetPlaceLatLngTask;
     private Dialog.Builder builder = null;
     private LinearLayout mLlLoadingResult;
     public static ArrayList<PlaceType> selectedPlaceTypes;
-    private String sortBy = "";
-    private int distance = 5;
     private static final int DIALOG_RESULT_CODE = 1;
     private RecyclerView mRvResults;
     private ArrayList<Place> listResults = new ArrayList<>();
@@ -107,6 +120,12 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     HandlerThread mHandlerThread;
     Handler mThreadHandler;
     GPSTracker gps;
+    private RelativeLayout mMapContainer;
+    private GoogleMap mMap;
+    private LatLngBounds.Builder mLatlngBuilder = new LatLngBounds.Builder();
+    private CameraUpdate mCameraUpdate;
+    private List<Marker> mListMarker = new ArrayList<Marker>();
+    private boolean isSearchTaskFinished = true;
 
     public SearchFragment() {
     }
@@ -124,7 +143,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ((AppCompatActivity)getActivity()).getSupportActionBar().hide();
+        ((AppCompatActivity) getActivity()).getSupportActionBar().hide();
         View view = inflater.inflate(R.layout.fragment_search, container, false);
         KissTools.setContext(getActivity());
         autoCompleteView = (AutoCompleteTextView) view.findViewById(R.id.autoCompleteTextView);
@@ -145,6 +164,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mLayout = (SlidingUpPanelLayout) view.findViewById(R.id.sliding_layout);
         mMainPanel = (FrameLayout) view.findViewById(R.id.mainPanel);
         radiusBlock = (LinearLayout) view.findViewById(R.id.radiusBlock);
+        mFabSwitchView = (FloatingActionButton) view.findViewById(R.id.fabSwitchView);
+        mMapContainer = (RelativeLayout) view.findViewById(R.id.mapContainer);
+
         mZoomInAnimation = AnimationUtils.loadAnimation(getActivity(),
                 R.anim.zoom_in);
         mZoomOutAnimation = AnimationUtils.loadAnimation(getActivity(),
@@ -152,6 +174,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         mBtnSearch.setOnClickListener(this);
         mClearText.setOnClickListener(this);
         mbtnSpeechInput.setOnClickListener(this);
+        mFabSwitchView.setOnClickListener(this);
         setupSlidePanel();
         setupResultRecycleView();
         setupSortBy();
@@ -164,6 +187,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             mPgCurrentLocation.setVisibility(View.GONE);
         }
         getLocationOnStart();
+        setUpMapIfNeeded();
         return view;
     }
 
@@ -181,11 +205,74 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
         } catch (ActivityNotFoundException a) {
             Toast.makeText(getActivity(),
-                    getString(R.string.action_example),
+                    "Can not use speech input",
                     Toast.LENGTH_SHORT).show();
         }
     }
 
+    /**
+     * Sets up the map if it is possible to do so
+     */
+    public void setUpMapIfNeeded() {
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mMap == null) {
+            // Try to obtain the map from the SupportMapFragment.
+            ((SupportMapFragment) this.getChildFragmentManager().findFragmentById(R.id.map)).getMapAsync(this);
+            // Check if we were successful in obtaining the map.
+            // check if map is created successfully or not
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        //do stuff when map is ready
+        mMap = googleMap;
+
+    }
+
+    /**
+     * Show the marker of all the places on the map
+     */
+    public void showListMarker(ArrayList<Place> arrayList) {
+        if (arrayList.size() > 0) {
+            for (Place p : arrayList) {
+                Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(p.getLat(), p.getLng())).title(p.getName()));
+                mListMarker.add(m);
+                mLatlngBuilder.include(m.getPosition());
+            }
+            updateCameraMap(mLatlngBuilder);
+        }
+    }
+
+    private void showOneMarker(Place p) {
+        Marker m = mMap.addMarker(new MarkerOptions().position(new LatLng(p.getLat(), p.getLng())).title(p.getName()));
+        mListMarker.add(m);
+        mLatlngBuilder.include(m.getPosition());
+    }
+
+    /**
+     * Update the camera of the map
+     *
+     * @param latLngBounds LatLngBounds
+     */
+    private void updateCameraMap(LatLngBounds.Builder latLngBounds) {
+        int padding = 50;
+        /**create the bounds from latlngBuilder to set into map camera*/
+        LatLngBounds bounds = latLngBounds.build();
+        /**create the camera with bounds and padding to set into map*/
+        mCameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, padding);
+        mMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                /**set animated zoom camera into map*/
+                mMap.animateCamera(mCameraUpdate);
+            }
+        });
+    }
+
+    /**
+     * Setup for slide panel
+     */
     public void setupSlidePanel() {
 //        mSlidingUpPanel.openPanel();
         mLayout.setPanelSlideListener(new PanelSlideListener() {
@@ -218,6 +305,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         });
     }
 
+    /**
+     * Setup sort by function
+     */
     public void setupSortBy() {
         CompoundButton.OnCheckedChangeListener listener = new CompoundButton.OnCheckedChangeListener() {
 
@@ -244,6 +334,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         radDistance.setOnCheckedChangeListener(listener);
     }
 
+    /**
+     * Setup search radius
+     */
     public void setupRadius() {
         mSeekBarRadius.setProgress(5);
         mSeekBarRadius.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -270,15 +363,37 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         });
     }
 
-
-    public void doSearch() {
+    private void resetData() {
+        //reset all previous data
         CommonData.currentSearchOption.setPageToken("");
+        CommonData.currentSearchOption.setDone(false);
+        isSearchTaskFinished = true;
         mRvResults.removeAllViews();
         listResults.clear();
         mAdapter.notifyDataSetChanged();
-        mLlLoadingResult.setVisibility(View.VISIBLE);
-        SearchTask task = new SearchTask();
-        task.execute(CommonData.currentSearchOption);
+        mMap.clear();
+        mListMarker.clear();
+        mLatlngBuilder = new LatLngBounds.Builder();
+    }
+
+    /**
+     * Search method
+     */
+    private void doSearch() {
+        if (CommonData.currentSearchOption.isSearchForList()) {
+            //search for list view
+            SearchTask task = new SearchTask();
+            task.execute(CommonData.currentSearchOption);
+        } else {
+            //search for map view
+            //Repeat task until the filed next_page_token was not found in the JSON result
+//            while (isSearchTaskFinished && !CommonData.currentSearchOption.getDone()) {
+//                SearchTask task = new SearchTask();
+//                task.execute(CommonData.currentSearchOption);
+//            }
+            SearchTask task = new SearchTask();
+            task.execute(CommonData.currentSearchOption);
+        }
     }
 
     /**
@@ -337,6 +452,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
     @Override
     public void onResume() {
         super.onResume();
+        setUpMapIfNeeded();
     }
 
     @Override
@@ -396,13 +512,32 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 //                    Fragment mFragment = new SearchResultFragment();
 //                    MainActivity main = (MainActivity) getActivity();
 //                    main.setFragmentChild(mFragment, "Result");
-                    if(CommonData.currentSearchOption.getRankBy().compareTo(SearchOptions.DISTANCE)==0 && CommonData.currentSearchOption.getPlaceTypes().size()==0){
-                        Toast.makeText(getActivity(), "Please chose a place type!",Toast.LENGTH_SHORT).show();
+                    if (CommonData.currentSearchOption.getRankBy().compareTo(SearchOptions.DISTANCE) == 0 && CommonData.currentSearchOption.getPlaceTypes().size() == 0) {
+                        Toast.makeText(getActivity(), "Please chose a place type!", Toast.LENGTH_SHORT).show();
                         return;
                     }
-                    if(mLayout.getPanelState()== SlidingUpPanelLayout.PanelState.EXPANDED)
+                    if (mLayout.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED)
                         mLayout.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                    resetData();
                     doSearch();
+                }
+                break;
+            case R.id.fabSwitchView:
+                if (CURRENT_VIEW_MODE == VIEW_MODE_LIST) {
+                    //switch to map view
+                    CommonData.currentSearchOption.setSearchForMap(true);
+                    CURRENT_VIEW_MODE = VIEW_MODE_MAP;
+                    mRvResults.setVisibility(View.GONE);
+                    mMapContainer.setVisibility(View.VISIBLE);
+                    //showListMarker(listResults);
+                    if (!CommonData.currentSearchOption.getDone())
+                        doSearch();
+                } else {
+                    //switch to list view
+                    CommonData.currentSearchOption.setSearchForList(true);
+                    CURRENT_VIEW_MODE = VIEW_MODE_LIST;
+                    mRvResults.setVisibility(View.VISIBLE);
+                    mMapContainer.setVisibility(View.GONE);
                 }
                 break;
         }
@@ -413,9 +548,15 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         getLocationOnStart();
     }
 
+    @Override
+    public void onLocationFailed() {
+        mPgCurrentLocation.setVisibility(View.GONE);
+        mbtnCurrentLocation.setVisibility(View.VISIBLE);
+    }
+
     /**
      * Add selected place types to the container view after user chose the dialog
-    */
+     */
     private void addPlaceTypeToContainer() {
         if (selectedPlaceTypes.size() > 0) {
             mPlaceTypeContainer.removeAllViews();
@@ -598,6 +739,9 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         });
     }
 
+    /**
+     * Setup the RecycleView result
+     */
     private void setupResultRecycleView() {
         mRvResults.setHasFixedSize(true);
         LinearLayoutManager llm = new LinearLayoutManager(getActivity());
@@ -609,7 +753,7 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
                 Toast.makeText(
                         getActivity(),
                         "Data : \n" + place.getName() + " \n"
-                                + place.getFormatted_address() + "\n "+ place.getLat() + ", " + place.getLng(),
+                                + place.getFormatted_address() + "\n " + place.getLat() + ", " + place.getLng(),
                         Toast.LENGTH_SHORT).show();
             }
         });
@@ -682,9 +826,14 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
         }
     }
 
+    /**
+     * Search for nearby places task
+     */
     private class SearchTask extends AsyncTask<SearchOptions, Integer, ArrayList<Place>> {
         @Override
         protected void onPreExecute() {
+            isSearchTaskFinished = false;
+            //if there's next page, add a loading progressbar to the end of the list
             if (CommonData.currentSearchOption.canLoadMore() && listResults.size() > 0) {
                 listResults.add(null);
                 mAdapter.notifyItemInserted(listResults.size() - 1);
@@ -699,18 +848,26 @@ public class SearchFragment extends Fragment implements LocationListenerCallback
 
         @Override
         protected void onPostExecute(ArrayList<Place> result) {
+            isSearchTaskFinished = true;
             mLlLoadingResult.setVisibility(View.GONE);
+            //remove the loading progressbar at the end of the list
             if (listResults.size() > 1 && listResults.get(listResults.size() - 1) == null) {
                 listResults.remove(listResults.size() - 1);
                 mAdapter.notifyItemRemoved(listResults.size());
             }
+            //add the result to the current list
             if (result != null) {
                 for (Place p : result) {
                     listResults.add(p);
                     mAdapter.notifyItemInserted(listResults.size() - 1);
+                    showOneMarker(p);
                 }
+                updateCameraMap(mLatlngBuilder);
                 LogUtil.log("Search result", listResults.toString());
                 mAdapter.setLoaded();
+            }
+            if(CommonData.currentSearchOption.canLoadMore() && isSearchTaskFinished && CURRENT_VIEW_MODE==VIEW_MODE_MAP){
+                new SearchTask().execute(CommonData.currentSearchOption);
             }
         }
     }
