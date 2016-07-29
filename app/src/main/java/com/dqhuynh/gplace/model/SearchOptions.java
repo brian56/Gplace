@@ -34,7 +34,7 @@ public class SearchOptions implements Serializable {
     private Boolean isSearchForList = true;
     private Boolean isDone = false;
     public SearchOptions() {
-
+        
     }
     public SearchOptions(Location location, int radius, String keyword, String language,
                          String name, boolean openNow, ArrayList<PlaceType> placeTypes,
