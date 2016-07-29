@@ -1,0 +1,331 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dragView"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#00ffffff"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:background="#ffffff">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_medium">
+
+            <android.support.v7.widget.CardView
+                app:cardCornerRadius="@dimen/border_radius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:padding="@dimen/padding_medium"
+                    android:weightSum="100">
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="10">
+
+                        <com.rey.material.widget.ProgressView
+                            android:id="@+id/progressCurrentLocation"
+                            app:pv_autostart="true"
+                            app:pv_circular="true"
+                            app:pv_progressMode="indeterminate"
+                            app:pv_progressStyle="@style/ColorsCircularProgressDrawableStyle"
+                            android:layout_width="match_parent"
+                            android:layout_height="24dp"
+                            android:layout_centerInParent="true" />
+
+                        <ImageView
+                            android:id="@+id/btnCurrentLocation"
+                            android:layout_width="@dimen/btn_xlarge"
+                            android:layout_height="@dimen/btn_xlarge"
+                            android:layout_centerInParent="true"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_launcher"
+                            android:visibility="invisible" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_weight="90">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/autoCompleteTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="@dimen/margin_medium"
+                            android:background="@android:color/transparent"
+                            android:dropDownHeight="wrap_content"
+                            android:padding="@dimen/padding_small"
+                            android:textSize="@dimen/textSize_medium"></AutoCompleteTextView>
+
+                        <ImageView
+                            android:id="@+id/btnClearText"
+                            android:layout_width="@dimen/btn_xlarge"
+                            android:layout_height="@dimen/btn_xlarge"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/common_google_signin_btn_icon_dark_disabled"
+                            android:visibility="gone" />
+
+                        <ImageView
+                            android:id="@+id/btnSpeechToText"
+                            android:layout_width="@dimen/btn_xlarge"
+                            android:layout_height="@dimen/btn_xlarge"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:src="@drawable/ic_launcher" />
+                    </RelativeLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                app:cardCornerRadius="@dimen/border_radius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_medium">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:orientation="horizontal"
+                        android:weightSum="100">
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/btn_xlarge"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="10"
+                            android:src="@drawable/ic_launcher" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/margin_medium"
+                            android:layout_weight="90"
+                            android:text="Add place type to search"
+                            android:textSize="@dimen/textSize_medium" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="10"></LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="@dimen/margin_medium"
+                            android:layout_weight="90"
+                            android:gravity="center"
+                            android:orientation="vertical">
+
+                            <org.apmem.tools.layouts.FlowLayout xmlns:f="http://schemas.android.com/apk/res/com.dqhuynh.gplace"
+                                android:id="@+id/placeTypeContainer"
+                                android:layout_width="fill_parent"
+                                android:layout_height="wrap_content"
+                                android:focusable="true"
+                                android:focusableInTouchMode="true"
+                                android:gravity="fill"
+                                android:orientation="horizontal"
+                                f:layoutDirection="ltr"
+                                f:weightDefault="1.0"></org.apmem.tools.layouts.FlowLayout>
+
+                            <com.andexert.library.RippleView
+                                app:rv_rippleDuration="200"
+                                android:layout_width="match_parent"
+                                android:layout_height="48dp"
+                                android:layout_weight="0">
+
+                                <Button
+                                    android:id="@+id/btnAddPlaceType"
+                                    android:layout_width="@dimen/btn_width_xlarge"
+                                    android:layout_height="@dimen/btn_xxlarge"
+                                    android:focusable="true"
+                                    android:text="Add"
+                                    android:textAllCaps="false"
+                                    android:textColor="@color/white"
+                                    android:theme="@style/AppTheme.Button" />
+                            </com.andexert.library.RippleView>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+
+            <android.support.v7.widget.CardView
+                app:cardCornerRadius="@dimen/border_radius"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/margin_medium"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/margin_medium"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="@dimen/padding_medium">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:weightSum="100">
+
+                        <ImageView
+                            android:layout_width="0dp"
+                            android:layout_height="@dimen/btn_xlarge"
+                            android:layout_gravity="center_vertical"
+                            android:layout_weight="10"
+                            android:src="@drawable/ic_launcher" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="@dimen/margin_medium"
+                            android:layout_weight="90"
+                            android:text="Sort by"
+                            android:textSize="@dimen/textSize_medium" />
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/margin_medium"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <RadioButton
+                                android:id="@+id/radDistance"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/margin_medium"
+                                android:checked="false"
+                                android:gravity="center_vertical"
+                                android:text="Distance"
+                                android:textSize="@dimen/textSize_small" />
+
+                            <RadioButton
+                                android:id="@+id/radProminence"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/margin_medium"
+                                android:checked="true"
+                                android:gravity="center_vertical"
+                                android:text="Prominence"
+                                android:textSize="@dimen/textSize_small" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/radiusBlock"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:visibility="visible">
+
+                            <TextView
+                                android:id="@+id/tvRadius"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="@dimen/margin_large"
+                                android:text="Radius: 5 km"
+                                android:textSize="@dimen/textSize_medium" />
+
+                            <SeekBar
+                                android:id="@+id/seekBarRadius"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="@dimen/margin_medium"
+                                android:max="50"
+                                android:progress="5"
+                                android:progressDrawable="@drawable/seekbar_progress_background"
+                                android:thumb="@drawable/seekbar_thumb_background" />
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff">
+
+            <com.andexert.library.RippleView
+                app:rv_rippleDuration="200"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_xxlarge">
+
+                <Button
+                    android:id="@+id/btnSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/btn_xxlarge"
+                    android:layout_centerInParent="true"
+                    android:text="Search"
+                    android:textAllCaps="false"
+                    android:textColor="@color/white"
+                    android:theme="@style/AppTheme.Button" />
+            </com.andexert.library.RippleView>
+        </LinearLayout>
+
+
+        <Button
+            android:id="@+id/btnDrag"
+            android:layout_width="@dimen/btn_width_large"
+            android:layout_height="@dimen/btn_xxlarge"
+            android:layout_gravity="center"
+            android:focusable="true"
+            android:theme="@style/AppTheme.Button" />
+    </LinearLayout>
+</LinearLayout>

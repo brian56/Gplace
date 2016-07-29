@@ -23,6 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:padding="@dimen/padding_medium">
+
             <RelativeLayout
                 android:id="@+id/mapContainer"
                 android:layout_width="fill_parent"
@@ -33,9 +34,10 @@
                     android:id="@+id/map"
                     android:name="com.google.android.gms.maps.SupportMapFragment"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent" />
 
             </RelativeLayout>
+
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/rvResults"
                 android:layout_width="match_parent"
@@ -62,6 +64,7 @@
                     app:pv_progressStyle="@style/ColorsCircularProgressDrawableStyle" />
 
             </LinearLayout>
+
             <android.support.design.widget.FloatingActionButton
                 android:id="@+id/fabSwitchView"
                 android:layout_width="wrap_content"
@@ -72,7 +75,8 @@
                 app:layout_anchorGravity="bottom|right|end" />
         </FrameLayout>
 
-        <LinearLayout
+        <include layout="@layout/search_drag_view" />
+        <!--<LinearLayout
             android:id="@+id/dragView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -400,6 +404,6 @@
                     android:focusable="true"
                     android:theme="@style/AppTheme.Button" />
             </LinearLayout>
-        </LinearLayout>
+        </LinearLayout>-->
     </com.sothree.slidinguppanel.SlidingUpPanelLayout>
 </RelativeLayout>
